@@ -1,75 +1,77 @@
-import yfinance as yf
-import json
+import DataManager as dm
 from datetime import datetime, timedelta
 import os
-
 import dearpygui.dearpygui as dpg
-# Download historical data for FNGU and FNGD
+historical_data = None
+historical_dates = []
+historical_closes = []
+graphLabel = "Loaded Data"
+# Check if json exists and load it if it does
+def setupHistoricalData():
+    global historical_data, historical_dates, historical_closes
+    historical_data = dm.loadData()
+    historical_dates = dm.getJsonDates(historical_data)
+    historical_closes = dm.getJsonCloses(historical_data)
+    
 
-# Get the last market closing date
-today = datetime.now()
-if today.weekday() == 5:  # Saturday
-    end_date = (today - timedelta(days=1)).strftime('%Y-%m-%d')
-elif today.weekday() == 6:  # Sunday
-    end_date = (today - timedelta(days=2)).strftime('%Y-%m-%d')
-else:
-    end_date = today.strftime('%Y-%m-%d')
+def setupFNGU():
+    global graphLabel
+    graphLabel = "FNGU"
+    dm.downloadFNGU()
+    if os.path.exists('historical_data.json'):
+        setupHistoricalData()
+    else:
+        print("Error: File not found")
 
-def is_data_up_to_date(file_path, end_date):
-    if not os.path.exists(file_path):
-        return False
-    with open(file_path, 'r') as f:
-        data = json.load(f)
-        last_date = max(int(date) for date in data['Close'].keys())
-        last_date_str = datetime.fromtimestamp(last_date / 1000).strftime('%Y-%m-%d')
-        print(last_date_str)
-        print(end_date)
-        print(last_date_str >= end_date)
-        return last_date_str >= end_date
-
-fngu_file = 'FNGU_historical_data.json'
-fngd_file = 'FNGD_historical_data.json'
-
-if not is_data_up_to_date(fngu_file, end_date):
-    fngu_data = yf.download('FNGU', start='2020-01-01', end=end_date)
-    fngu_data.to_json(fngu_file)
-
-if not is_data_up_to_date(fngd_file, end_date):
-    fngd_data = yf.download('FNGD', start='2020-01-01', end=end_date)
-    fngd_data.to_json(fngd_file)
+def setupFNGD():
+    global graphLabel
+    graphLabel = "FNGD"
+    dm.downloadFNGD()
+    if os.path.exists('historical_data.json'):
+        setupHistoricalData()
+    else:
+        print("Error: File not found")
+    
 
 
-# Load the data from the JSON files and display the data in a graph in DearPyGui
-# Load the data from the JSON files
-with open('FNGU_historical_data.json', 'r') as f:
-    fngu_data = json.load(f)
+if os.path.exists('historical_data.json'):
+    historical_data = dm.loadData()
+    historical_dates = dm.getJsonDates(historical_data)
+    historical_closes = dm.getJsonCloses(historical_data)
 
-with open('FNGD_historical_data.json', 'r') as f:
-    fngd_data = json.load(f)
-
-# Extract dates and closing prices
-fngu_dates = [int(date) / 1000 for date in fngu_data['Close'].keys()]
-fngu_closes = list(fngu_data['Close'].values())
-
-fngd_dates = [int(date) / 1000 for date in fngd_data['Close'].keys()]
-fngd_closes = list(fngd_data['Close'].values())
-
+    
 # Create DearPyGui context and viewport
 dpg.create_context()
-dpg.create_viewport(title='Trading Data', width=850, height=700)
-
-with dpg.window(label="FNGU and FNGD Historical Data", width=850, height=650):
-    dpg.add_text("FNGU and FNGD Closing Prices")
-    with dpg.plot(label="Closing Prices", height=600, width=800):
-        dpg.add_plot_legend()
-        dpg.add_plot_axis(dpg.mvXAxis, label="Date")
-        y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Price")
-        dpg.set_axis_limits(y_axis, 0, 25000)
+def show_graph():
+    close_graph()
+    with dpg.window(label=graphLabel, width=850, height=650,no_collapse=True,no_title_bar=False,pos=[200,0],no_resize=True,no_move=True,tag="Historical Data"):
+        dpg.add_text("Closing Prices")
+        with dpg.plot(label="Closing Prices", height=600, width=800):
+            dpg.add_plot_legend()
+            dpg.add_plot_axis(dpg.mvXAxis, label="Date")
+            y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Price")
+            dpg.set_axis_limits(y_axis, 0, 25000)
         
-        dpg.add_line_series(fngu_dates, fngu_closes, label="FNGU", parent=y_axis)
-        dpg.add_line_series(fngd_dates, fngd_closes, label="FNGD", parent=y_axis)
+            dpg.add_line_series(historical_dates, historical_closes, label="Data", parent=y_axis)
+def close_graph():
+    if dpg.does_item_exist("Historical Data"):
+        dpg.delete_item("Historical Data")
 
+if os.path.exists('historical_data.json'):
+    show_graph()
+with dpg.window(tag="Primary Window"):
+    def on_button_fngu():
+        setupFNGU()
+    
+    def on_button_fngd():
+        setupFNGD()        
+
+    buttonFngu = dpg.add_button(label="Download FNGU Data",callback=on_button_fngu)
+    buttonFngd = dpg.add_button(label="Download FNGD Data",callback=on_button_fngd)
+    buttonShowGraph = dpg.add_button(label="Show Graph", callback=show_graph)
+dpg.create_viewport(title='Trading Data', width=1100, height=675)
 dpg.setup_dearpygui()
 dpg.show_viewport()
+dpg.set_primary_window("Primary Window", True)
 dpg.start_dearpygui()
 dpg.destroy_context()
