@@ -9,7 +9,8 @@ historical_highs = []
 historical_lows = []
 historical_opens = []
 graphLabel = "Loaded Data"
-# Check if json exists and load it if it does
+
+#load historical data
 def setupHistoricalData():
     global historical_data, historical_dates, historical_closes, historical_highs, historical_lows, historical_opens
     historical_data = dm.loadData()
@@ -19,7 +20,7 @@ def setupHistoricalData():
     historical_lows = dm.getJsonLows(historical_data)
     historical_opens = dm.getJsonOpens(historical_data)
     
-
+#download FNGU data and load it
 def setupFNGU():
     global graphLabel
     graphLabel = "FNGU"
@@ -28,7 +29,7 @@ def setupFNGU():
         setupHistoricalData()
     else:
         print("Error: File not found")
-
+#download FNGD data and load it
 def setupFNGD():
     global graphLabel
     graphLabel = "FNGD"
@@ -39,16 +40,17 @@ def setupFNGD():
         print("Error: File not found")
     
 
-
+# Check if json exists and load it if it does
 if os.path.exists('historical_data.json'):
     setupHistoricalData()
     
-# Create DearPyGui context and viewport
 dpg.create_context()
+
+#Display the graph
 def show_graph():
     close_graph()
-    with dpg.window(label=graphLabel, width=950, height=675,no_collapse=True,pos=[200,0],no_resize=True,no_move=True,tag="Historical Data"):
-        dpg.add_text("Closing Prices")
+    with dpg.window(label=graphLabel, width=950, height=675,no_title_bar=True,no_collapse=True,pos=[200,0],no_resize=True,no_move=True,tag="Historical Data"):
+ 
         def toggle_line_graph():
             dpg.configure_item(line_graph, show=not dpg.get_item_configuration(line_graph)["show"])
         def toggle_candle_graph():
@@ -76,7 +78,7 @@ def close_graph():
         dpg.delete_item("Historical Data")
        
     
-
+#buttons to download data and turn graph on. Should mostly be setup stuff like graph range and such.
 if os.path.exists('historical_data.json'):
     show_graph()
 with dpg.window(tag="Primary Window",width = 1100):
@@ -91,7 +93,7 @@ with dpg.window(tag="Primary Window",width = 1100):
     buttonFngu = dpg.add_button(label="Download FNGU Data",callback=on_button_fngu)
     buttonFngd = dpg.add_button(label="Download FNGD Data",callback=on_button_fngd)
     
-dpg.create_viewport(title='Trading Data', width=1150, height=725)
+dpg.create_viewport(title='Trading Data', width=1168, height=705)
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.set_primary_window("Primary Window", True)
