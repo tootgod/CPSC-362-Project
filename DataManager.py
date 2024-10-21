@@ -1,6 +1,7 @@
 import yfinance as yf
 import json
 from datetime import datetime, timedelta
+import pandas as pd
 
 def downloadFNGU():
     today = datetime.now()
@@ -18,7 +19,20 @@ def loadData():
     return json.load(open('historical_data.json', 'r'))
 
 def getJsonDates(data):
-    return [int(date) / 1000 for date in data['Close'].keys()]
+   return [int(date) / 1000 for date in data['Close'].keys()]
 
 def getJsonCloses(data):
-    return list(data['Close'].values())
+    lists = list(data['Close'].values())
+    return lists
+
+def getJsonHighs(data):
+    lists = list(data['High'].values())
+    return lists
+
+def getJsonLows(data):
+    lists = list(data['Low'].values())
+    return lists
+
+def getJsonOpens(data):
+    lists = list(data['Open'].values())
+    return lists
