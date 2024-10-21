@@ -44,7 +44,7 @@ if os.path.exists('historical_data.json'):
 dpg.create_context()
 def show_graph():
     close_graph()
-    with dpg.window(label=graphLabel, width=850, height=650,no_collapse=True,no_title_bar=False,pos=[200,0],no_resize=True,no_move=True,tag="Historical Data"):
+    with dpg.window(label=graphLabel, width=850, height=650,no_collapse=True,no_title_bar=True,pos=[200,0],no_resize=True,no_move=True,tag="Historical Data"):
         dpg.add_text("Closing Prices")
         with dpg.plot(label="Closing Prices", height=600, width=800):
             dpg.add_plot_legend()
