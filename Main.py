@@ -2,7 +2,7 @@ import DataManager as dm
 from datetime import datetime, timedelta
 import os
 import dearpygui.dearpygui as dpg
-historical_data = None
+historical_data = None      #testing
 historical_dates = []
 historical_closes = []
 historical_highs = []
@@ -50,7 +50,7 @@ dpg.create_context()
 def show_graph():
     close_graph()
     with dpg.window(label=graphLabel, width=950, height=675,no_title_bar=True,no_collapse=True,pos=[200,0],no_resize=True,no_move=True,tag="Historical Data"):
- 
+
         def toggle_line_graph():
             dpg.configure_item(line_graph, show=not dpg.get_item_configuration(line_graph)["show"])
         def toggle_candle_graph():
