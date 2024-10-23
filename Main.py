@@ -69,8 +69,6 @@ def show_graph():
             line_graph = dpg.add_line_series(historical_dates, historical_closes, parent=y_axis,label = "Line Data")
             candle_graph = dpg.add_candle_series(historical_dates, historical_opens,historical_closes ,historical_lows, historical_highs, parent=y_axis,show=True,tooltip=True,label="Candle Data")
         
-        #buttonShowLineGraph = dpg.add_button(label="Toggle Line Graph", callback=toggle_line_graph,pos=[800,0])
-        #buttonShowCandleGraph = dpg.add_button(label="Toggle Candle Graph", callback=toggle_candle_graph)
         
 
 def close_graph():
