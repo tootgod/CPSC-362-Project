@@ -4,17 +4,17 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 #downloads FNGU data and saves it to a json file with a set start range
-def downloadFNGU():
+def downloadFNGU(start_date):
     today = datetime.now()
     end_date = today.strftime('%Y-%m-%d')
-    fngu_data = yf.download('FNGU', start='2020-01-01', end=end_date)
+    fngu_data = yf.download('FNGU', start=start_date, end=end_date)
     fngu_data.to_json('historical_data.json')
 
 #downloads FNGD data and saves it to a json file with a set start range
-def downloadFNGD():
+def downloadFNGD(start_date):
     today = datetime.now()
     end_date = today.strftime('%Y-%m-%d')
-    fngd_data = yf.download('FNGD', start='2020-01-01', end=end_date)
+    fngd_data = yf.download('FNGD', start=start_date, end=end_date)
     fngd_data.to_json('historical_data.json')
 
 #loads the json data from the file
