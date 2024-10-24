@@ -9,6 +9,7 @@ historical_highs = []
 historical_lows = []
 historical_opens = []
 graphLabel = "Loaded Data"
+date = datetime.now()
 
 #load historical data
 def setupHistoricalData():
@@ -24,7 +25,7 @@ def setupHistoricalData():
 def setupFNGU():
     global graphLabel
     graphLabel = "FNGU"
-    dm.downloadFNGU()
+    dm.downloadFNGU(date)
     if os.path.exists('historical_data.json'):
         setupHistoricalData()
     else:
@@ -33,7 +34,7 @@ def setupFNGU():
 def setupFNGD():
     global graphLabel
     graphLabel = "FNGD"
-    dm.downloadFNGD()
+    dm.downloadFNGD(date)
     if os.path.exists('historical_data.json'):
         setupHistoricalData()
     else:
@@ -81,16 +82,32 @@ if os.path.exists('historical_data.json'):
     show_graph()
 with dpg.window(tag="Primary Window",width = 1100):
     def on_button_fngu():
+        global date
+        day = int(dpg.get_value(dayDropdown))
+        month = int(dpg.get_value(monthDropdown))
+        year = int(dpg.get_value(yearDropdown))
+        date = datetime(year,month,day)
         setupFNGU()
         show_graph()
     
     def on_button_fngd():
-        setupFNGD()
-        show_graph()        
+        global date
+        day = int(dpg.get_value(dayDropdown))
+        month = int(dpg.get_value(monthDropdown))
+        year = int(dpg.get_value(yearDropdown))
+        date = datetime(year,month,day)
+        setupFNGD()        
+        show_graph()       
+    
+    
+        
 
     buttonFngu = dpg.add_button(label="Download FNGU Data",callback=on_button_fngu)
     buttonFngd = dpg.add_button(label="Download FNGD Data",callback=on_button_fngd)
-    
+    monthDropdown = dpg.add_combo(label="Month", items=["1","2","3","4","5","6","7","8","9","10","11","12"],default_value="1",width=50)
+    dayDropdown = dpg.add_combo(label="Day", items=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31"],default_value="1",width=50)
+    yearDropdown = dpg.add_combo(label="Year", items=["2024","2023","2022","2021","2020","2019","2018"],default_value="2020",width=50)
+
 dpg.create_viewport(title='Trading Data', width=1168, height=705)
 dpg.setup_dearpygui()
 dpg.show_viewport()
