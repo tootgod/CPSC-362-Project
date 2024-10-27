@@ -9,8 +9,6 @@ historical_data = None
 sec = None
 graphLabel = "Loaded Data"
 
-date = datetime.now()
-
 #load historical data
 def setupHistoricalData():
     global historical_data, sec
@@ -80,23 +78,21 @@ if os.path.exists('historical_data.json'):
 with dpg.window(tag="Primary Window",width = 1100):
     def on_button_fngu():
 
-        global date
         day = int(dpg.get_value(dayDropdown))
         month = int(dpg.get_value(monthDropdown))
         year = int(dpg.get_value(yearDropdown))
         date = datetime(year,month,day)
-        setupFNGU()
+        setupFNGU(date)
         sma.backtest_sma(historical_data)
         show_graph()
     
     def on_button_fngd():
-        global date
 
         day = int(dpg.get_value(dayDropdown))
         month = int(dpg.get_value(monthDropdown))
         year = int(dpg.get_value(yearDropdown))
         date = datetime(year,month,day)
-        setupFNGD()
+        setupFNGD(date)
         sma.backtest_sma(historical_data)        
 
         show_graph()       
