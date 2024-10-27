@@ -39,7 +39,10 @@ def setupFNGD(date):
 # Check if json exists and load it if it does
 if os.path.exists('historical_data.json'):
     setupHistoricalData()
-    
+
+
+   
+
 dpg.create_context()
 
 #Display the graph
@@ -70,6 +73,23 @@ def show_graph():
 def close_graph():
     if dpg.does_item_exist("Historical Data"):
         dpg.delete_item("Historical Data")
+
+def backtestWindow(strat):
+    with dpg.window(label=strat,width = 200,height=100):
+        if strat == "SMA":
+            sma.backtest_sma(historical_data)
+            dpg.add_text("SMA Backtest Results")
+            dpg.add_text("Total gain/loss: " + "0")
+            dpg.add_text("% Return: " + "0")
+        elif strat == "BB":
+            dpg.add_text("BB Backtest Results")
+            dpg.add_text("Total gain/loss: " + "0")
+            dpg.add_text("% Return: " + "0")    
+        elif strat == "MACD":
+            dpg.add_text("MACD Backtest Results")
+            dpg.add_text("Total gain/loss: " + "0")
+            dpg.add_text("% Return: " + "0")
+            
        
     
 #buttons to download data and turn graph on. Should mostly be setup stuff like graph range and such.
@@ -94,8 +114,11 @@ with dpg.window(tag="Primary Window",width = 1100):
         date = datetime(year,month,day)
         setupFNGD(date)
         sma.backtest_sma(historical_data)        
-
         show_graph()       
+
+    def on_button_backtest():
+        backtest = dpg.get_value(backtestDropdown)
+        backtestWindow(backtest)
     
     
         
@@ -105,6 +128,8 @@ with dpg.window(tag="Primary Window",width = 1100):
     monthDropdown = dpg.add_combo(label="Month", items=["1","2","3","4","5","6","7","8","9","10","11","12"],default_value="1",width=50)
     dayDropdown = dpg.add_combo(label="Day", items=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31"],default_value="1",width=50)
     yearDropdown = dpg.add_combo(label="Year", items=["2024","2023","2022","2021","2020","2019","2018"],default_value="2020",width=50)
+    backtestDropdown = dpg.add_combo(label="Backtest", items=["SMA","BB","MACD"],default_value="SMA",width=50)
+    bacjtestButton = dpg.add_button(label="Run Backtest",callback=on_button_backtest)
 
 dpg.create_viewport(title='Trading Data', width=1168, height=705)
 dpg.setup_dearpygui()
