@@ -1,28 +1,20 @@
 import DataManager as dm
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 import dearpygui.dearpygui as dpg
+import Security
 historical_data = None
-historical_dates = []
-historical_closes = []
-historical_highs = []
-historical_lows = []
-historical_opens = []
+sec = None
 graphLabel = "Loaded Data"
-date = datetime.now()
-
 #load historical data
 def setupHistoricalData():
-    global historical_data, historical_dates, historical_closes, historical_highs, historical_lows, historical_opens
+    global historical_data, sec
     historical_data = dm.loadData()
-    historical_dates = dm.getJsonDates(historical_data)
-    historical_closes = dm.getJsonCloses(historical_data)
-    historical_highs = dm.getJsonHighs(historical_data)
-    historical_lows = dm.getJsonLows(historical_data)
-    historical_opens = dm.getJsonOpens(historical_data)
+    sec = Security.security(historical_data)
+    
     
 #download FNGU data and load it
-def setupFNGU():
+def setupFNGU(date):
     global graphLabel
     graphLabel = "FNGU"
     dm.downloadFNGU(date)
@@ -31,7 +23,7 @@ def setupFNGU():
     else:
         print("Error: File not found")
 #download FNGD data and load it
-def setupFNGD():
+def setupFNGD(date):
     global graphLabel
     graphLabel = "FNGD"
     dm.downloadFNGD(date)
@@ -67,8 +59,8 @@ def show_graph():
             dpg.set_axis_limits_auto(y_axis)
         
             
-            line_graph = dpg.add_line_series(historical_dates, historical_closes, parent=y_axis,label = "Line Data")
-            candle_graph = dpg.add_candle_series(historical_dates, historical_opens,historical_closes ,historical_lows, historical_highs, parent=y_axis,show=True,tooltip=True,label="Candle Data")
+            line_graph = dpg.add_line_series(sec.historical_dates, sec.historical_closes, parent=y_axis,label = "Line Data")
+            candle_graph = dpg.add_candle_series(sec.historical_dates, sec.historical_opens,sec.historical_closes ,sec.historical_lows, sec.historical_highs, parent=y_axis,show=True,tooltip=True,label="Candle Data")
         
         
 
@@ -82,21 +74,19 @@ if os.path.exists('historical_data.json'):
     show_graph()
 with dpg.window(tag="Primary Window",width = 1100):
     def on_button_fngu():
-        global date
         day = int(dpg.get_value(dayDropdown))
         month = int(dpg.get_value(monthDropdown))
         year = int(dpg.get_value(yearDropdown))
         date = datetime(year,month,day)
-        setupFNGU()
+        setupFNGU(date)
         show_graph()
     
     def on_button_fngd():
-        global date
         day = int(dpg.get_value(dayDropdown))
         month = int(dpg.get_value(monthDropdown))
         year = int(dpg.get_value(yearDropdown))
         date = datetime(year,month,day)
-        setupFNGD()        
+        setupFNGD(date)        
         show_graph()       
     
     

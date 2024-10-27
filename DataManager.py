@@ -1,7 +1,6 @@
 import yfinance as yf
 import json
-from datetime import datetime, timedelta
-import pandas as pd
+from datetime import datetime
 
 #downloads FNGU data and saves it to a json file with a set start range
 def downloadFNGU(start_date):
