@@ -1,113 +1,120 @@
-# sma_backtest.py
-
-import pandas as pd
-import numpy as np
+import DataManager as dm
 from datetime import datetime
-import csv
+import os
+import dearpygui.dearpygui as dpg
+import SmaBacktest as sma
 
-# SMA calculation function
-def calculate_sma(data, window):
-    return data.rolling(window=window).mean()
+historical_data = None
+historical_dates = []
+historical_closes = []
+historical_highs = []
+historical_lows = []
+historical_opens = []
+graphLabel = "Loaded Data"
+date = datetime.now()
 
-# Perform the SMA cross-over backtest
-def backtest_sma(historical_data, short_window=50, long_window=200, initial_balance=100000, symbol="ETF"):
-    dates = list(historical_data['Close'].keys())
-    closes = list(historical_data['Close'].values())
+#load historical data
+def setupHistoricalData():
+    global historical_data, historical_dates, historical_closes, historical_highs, historical_lows, historical_opens
+    historical_data = dm.loadData()
+    historical_dates = dm.getJsonDates(historical_data)
+    historical_closes = dm.getJsonCloses(historical_data)
+    historical_highs = dm.getJsonHighs(historical_data)
+    historical_lows = dm.getJsonLows(historical_data)
+    historical_opens = dm.getJsonOpens(historical_data)
+    
+#download FNGU data and load it
+def setupFNGU():
+    global graphLabel
+    graphLabel = "FNGU"
+    dm.downloadFNGU(date)
+    if os.path.exists('historical_data.json'):
+        setupHistoricalData()
+    else:
+        print("Error: File not found")
+#download FNGD data and load it
+def setupFNGD():
+    global graphLabel
+    graphLabel = "FNGD"
+    dm.downloadFNGD(date)
+    if os.path.exists('historical_data.json'):
+        setupHistoricalData()
+    else:
+        print("Error: File not found")
+    
 
-    # Convert to pandas dataframe
-    df = pd.DataFrame({
-        'Date': pd.to_datetime(dates),
-        'Close': closes
-    })
+# Check if json exists and load it if it does
+if os.path.exists('historical_data.json'):
+    setupHistoricalData()
+    
+dpg.create_context()
 
-    # Calculate SMAs
-    df['SMA50'] = calculate_sma(df['Close'], short_window)
-    df['SMA200'] = calculate_sma(df['Close'], long_window)
+#Display the graph
+def show_graph():
+    close_graph()
+    with dpg.window(label=graphLabel, width=950, height=675,no_title_bar=True,no_collapse=True,pos=[200,0],no_resize=True,no_move=True,tag="Historical Data"):
+ 
+        def toggle_line_graph():
+            dpg.configure_item(line_graph, show=not dpg.get_item_configuration(line_graph)["show"])
+        def toggle_candle_graph():
+            dpg.configure_item(candle_graph, show=not dpg.get_item_configuration(candle_graph)["show"])
+        with dpg.menu(label="Graph Options"):
+            dpg.add_menu_item(label="Toggle Line Graph", callback=toggle_line_graph)
+            dpg.add_menu_item(label="Toggle Candle Graph", callback=toggle_candle_graph)
+            dpg.add_menu_item(label="Close Graph", callback=close_graph)
+        with dpg.plot(label="Closing Prices", height=600, width=900):
+            dpg.add_plot_legend()
+            dpg.add_plot_axis(dpg.mvXAxis, label="Date",time=True)
+            y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Price")
+            dpg.set_axis_limits_auto(y_axis)
+        
+            
+            line_graph = dpg.add_line_series(historical_dates, historical_closes, parent=y_axis,label = "Line Data")
+            candle_graph = dpg.add_candle_series(historical_dates, historical_opens,historical_closes ,historical_lows, historical_highs, parent=y_axis,show=True,tooltip=True,label="Candle Data")
+        
+        
 
-    # Backtest variables
-    balance = initial_balance
-    shares_held = 0
-    trade_log = []
+def close_graph():
+    if dpg.does_item_exist("Historical Data"):
+        dpg.delete_item("Historical Data")
+       
+    
+#buttons to download data and turn graph on. Should mostly be setup stuff like graph range and such.
+if os.path.exists('historical_data.json'):
+    show_graph()
+with dpg.window(tag="Primary Window",width = 1100):
+    def on_button_fngu():
+        global date
+        day = int(dpg.get_value(dayDropdown))
+        month = int(dpg.get_value(monthDropdown))
+        year = int(dpg.get_value(yearDropdown))
+        date = datetime(year,month,day)
+        setupFNGU()
+        sma.backtest_sma(historical_data)
+        show_graph()
+    
+    def on_button_fngd():
+        global date
+        day = int(dpg.get_value(dayDropdown))
+        month = int(dpg.get_value(monthDropdown))
+        year = int(dpg.get_value(yearDropdown))
+        date = datetime(year,month,day)
+        setupFNGD()
+        sma.backtest_sma(historical_data)        
+        show_graph()       
+    
+    
+        
 
-    # Backtest logic
-    for i in range(1, len(df)):
-        date = df['Date'].iloc[i]
-        price = df['Close'].iloc[i]
-        sma50 = df['SMA50'].iloc[i]
-        sma200 = df['SMA200'].iloc[i]
+    buttonFngu = dpg.add_button(label="Download FNGU Data",callback=on_button_fngu)
+    buttonFngd = dpg.add_button(label="Download FNGD Data",callback=on_button_fngd)
+    monthDropdown = dpg.add_combo(label="Month", items=["1","2","3","4","5","6","7","8","9","10","11","12"],default_value="1",width=50)
+    dayDropdown = dpg.add_combo(label="Day", items=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31"],default_value="1",width=50)
+    yearDropdown = dpg.add_combo(label="Year", items=["2024","2023","2022","2021","2020","2019","2018"],default_value="2020",width=50)
 
-        # Buy signal
-        if df['SMA50'].iloc[i - 1] < df['SMA200'].iloc[i - 1] and sma50 > sma200 and shares_held == 0:
-            shares_bought = balance // price
-            transaction_amount = shares_bought * price
-            balance -= transaction_amount
-            shares_held = shares_bought
-            log_trade(trade_log, date, 'BUY', symbol, price, shares_bought, transaction_amount, balance)
-
-        # Sell signal
-        elif df['SMA50'].iloc[i - 1] > df['SMA200'].iloc[i - 1] and sma50 < sma200 and shares_held > 0:
-            transaction_amount = shares_held * price
-            gain_loss = transaction_amount - (shares_held * df['Close'].iloc[i - 1])
-            balance += transaction_amount
-            log_trade(trade_log, date, 'SELL', symbol, price, shares_held, transaction_amount, balance, gain_loss)
-            shares_held = 0
-
-    # Final sell if shares are still held
-    final_price = df['Close'].iloc[-1]
-    if shares_held > 0:
-        transaction_amount = shares_held * final_price
-        gain_loss = transaction_amount - (shares_held * df['Close'].iloc[-2])
-        balance += transaction_amount
-        log_trade(trade_log, df['Date'].iloc[-1], 'SELL (Final)', symbol, final_price, shares_held, transaction_amount, balance, gain_loss)
-        shares_held = 0
-
-    # Calculate final performance
-    total_gain_loss = balance - initial_balance
-    days = (df['Date'].iloc[-1] - df['Date'].iloc[0]).days
-    annual_return = ((1 + total_gain_loss / initial_balance) ** (365 / days) - 1) * 100
-    total_return = (balance - initial_balance) / initial_balance * 100
-
-    # Add summary to log
-    log_summary(trade_log, total_gain_loss, annual_return, total_return, balance)
-
-    # Save the log as CSV
-    save_trade_log(trade_log, f'{symbol}_trade_log.csv')
-
-    return balance, total_gain_loss, annual_return, total_return
-
-# Function to log each trade
-def log_trade(trade_log, date, action, symbol, price, shares, transaction_amount, balance, gain_loss=None):
-    trade_log.append({
-        'Date': date.strftime('%Y-%m-%d'),
-        'Action': action,
-        'Symbol': symbol,
-        'Price': price,
-        'Shares': shares,
-        'Transaction Amount': transaction_amount,
-        '$Gain/Loss': gain_loss if gain_loss else 0,
-        'Balance': balance
-    })
-
-# Function to log the summary
-def log_summary(trade_log, total_gain_loss, annual_return, total_return, balance):
-    trade_log.append({
-        'Date': 'SUMMARY',
-        'Action': '',
-        'Symbol': '',
-        'Price': '',
-        'Shares': '',
-        'Transaction Amount': '',
-        '$Gain/Loss': total_gain_loss,
-        'Balance': balance,
-        'Annual Return': annual_return,
-        'Total Return': total_return
-    })
-
-# Function to save the trade log as a CSV file
-def save_trade_log(trade_log, filename):
-    keys = trade_log[0].keys()
-    with open(filename, 'w', newline='') as output_file:
-        dict_writer = csv.DictWriter(output_file, fieldnames=keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(trade_log)
-    print(f'Trade log saved to {filename}')
+dpg.create_viewport(title='Trading Data', width=1168, height=705)
+dpg.setup_dearpygui()
+dpg.show_viewport()
+dpg.set_primary_window("Primary Window", True)
+dpg.start_dearpygui()
+dpg.destroy_context()
