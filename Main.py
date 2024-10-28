@@ -118,7 +118,7 @@ def backtestWindow(strat):
             dpg.add_text("Total % Return: " + str(round(summary["percent_return"], 2)) + "%")
             dpg.add_text("Trade Log:")
             for trade in summary["trade_log"]:
-                dpg.add_text(f"{trade[0]}, Signal: {trade[1]}, Amount: ${trade[5]:,.2f}")
+                dpg.add_text(f"{trade[0]}, Signal: {trade[1]}, Shares: {trade[4]}, Amount: ${trade[5]:,.2f}")
             
             run_tests()
             
