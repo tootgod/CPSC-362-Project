@@ -3,7 +3,11 @@ from datetime import datetime
 import os
 import dearpygui.dearpygui as dpg
 import SmaBacktest as sma
+import MACDBacktest as MACD
+import utest_MACD as utest_MACD
+import itest_MACD as itest_MACD
 import Security
+import unittest
 
 historical_data = None
 sec = None
@@ -36,7 +40,7 @@ def setupFNGD(date):
         print("Error: File not found")
     
 
-# Check if json exists and load it if it does
+#check if json exists and load it if it does
 if os.path.exists('historical_data.json'):
     setupHistoricalData()
 
@@ -45,10 +49,10 @@ if os.path.exists('historical_data.json'):
 
 dpg.create_context()
 
-#Display the graph
+#display the graph
 def show_graph():
     close_graph()
-    with dpg.window(label=graphLabel, width=950, height=675,no_title_bar=True,no_collapse=True,pos=[200,0],no_resize=True,no_move=True,tag="Historical Data"):
+    with dpg.window(label=graphLabel, width=950, height=675, no_title_bar=True, no_collapse=True, pos=[200, 0], no_resize=True, no_move=True, tag="Historical Data"):
  
         def toggle_line_graph():
             dpg.configure_item(line_graph, show=not dpg.get_item_configuration(line_graph)["show"])
@@ -63,16 +67,34 @@ def show_graph():
             dpg.add_plot_axis(dpg.mvXAxis, label="Date",time=True)
             y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Price")
             dpg.set_axis_limits_auto(y_axis)
-        
-            
-            line_graph = dpg.add_line_series(sec.historical_dates, sec.historical_closes, parent=y_axis,label = "Line Data")
-            candle_graph = dpg.add_candle_series(sec.historical_dates, sec.historical_opens,sec.historical_closes ,sec.historical_lows, sec.historical_highs, parent=y_axis,show=True,tooltip=True,label="Candle Data")
+
+            line_graph = dpg.add_line_series(sec.historical_dates, sec.historical_closes, parent=y_axis, label="Line Data")
+            candle_graph = dpg.add_candle_series(sec.historical_dates, sec.historical_opens, sec.historical_closes, sec.historical_lows, sec.historical_highs, parent=y_axis, show=True, tooltip=True, label="Candle Data")
         
         
 
 def close_graph():
     if dpg.does_item_exist("Historical Data"):
         dpg.delete_item("Historical Data")
+
+def run_tests():
+    # Discover and run tests from both test files
+    loader = unittest.TestLoader()
+    
+    # Load test cases from both test files
+    tests_1 = loader.loadTestsFromModule(utest_MACD)  # Adjust the import if needed
+    tests_2 = loader.loadTestsFromModule(itest_MACD)  # Adjust the import if needed
+    
+    # Create a test suite
+    suite = unittest.TestSuite([tests_1, tests_2])
+    
+    # Run the tests
+    runner = unittest.TextTestRunner()
+    results = runner.run(suite)
+
+    # Print the test results
+    print(f"Tests run: {results.testsRun}, Failures: {len(results.failures)}, Errors: {len(results.errors)}")
+
 
 def backtestWindow(strat):
     with dpg.window(label=strat,width = 200,height=100):
@@ -86,9 +108,19 @@ def backtestWindow(strat):
             dpg.add_text("Total gain/loss: " + "0")
             dpg.add_text("% Return: " + "0")    
         elif strat == "MACD":
+            # Run MACD Backtest
+            macd_backtest = MACD.MACDBacktest(historical_data, symbol = "MACD")
+            summary = macd_backtest.run()
+            
+            # Display MACD results in GUI
             dpg.add_text("MACD Backtest Results")
-            dpg.add_text("Total gain/loss: " + "0")
-            dpg.add_text("% Return: " + "0")
+            dpg.add_text("Final Balance: $" + str(round(summary["final_balance"], 2)))
+            dpg.add_text("Total % Return: " + str(round(summary["percent_return"], 2)) + "%")
+            dpg.add_text("Trade Log:")
+            for trade in summary["trade_log"]:
+                dpg.add_text(f"{trade[0]}, Signal: {trade[1]}")    
+            
+            run_tests()
             
        
     
@@ -103,7 +135,6 @@ with dpg.window(tag="Primary Window",width = 1100):
         year = int(dpg.get_value(yearDropdown))
         date = datetime(year,month,day)
         setupFNGU(date)
-        sma.backtest_sma(historical_data)
         show_graph()
     
     def on_button_fngd():
@@ -112,8 +143,7 @@ with dpg.window(tag="Primary Window",width = 1100):
         month = int(dpg.get_value(monthDropdown))
         year = int(dpg.get_value(yearDropdown))
         date = datetime(year,month,day)
-        setupFNGD(date)
-        sma.backtest_sma(historical_data)        
+        setupFNGD(date)     
         show_graph()       
 
     def on_button_backtest():
