@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 import dearpygui.dearpygui as dpg
 import SmaBacktest as sma
+import MACDBacktest as MACD
 import Security
 
 historical_data = None
@@ -86,9 +87,17 @@ def backtestWindow(strat):
             dpg.add_text("Total gain/loss: " + "0")
             dpg.add_text("% Return: " + "0")    
         elif strat == "MACD":
+            # Run MACD Backtest
+            macd_backtest = MACD.MACDBacktest(historical_data)
+            summary = macd_backtest.run()
+            
+            # Display MACD results in GUI
             dpg.add_text("MACD Backtest Results")
-            dpg.add_text("Total gain/loss: " + "0")
-            dpg.add_text("% Return: " + "0")
+            dpg.add_text("Final Balance: $" + str(round(summary["final_balance"], 2)))
+            dpg.add_text("Total % Return: " + str(round(summary["percent_return"], 2)) + "%")
+            dpg.add_text("Trade Log:")
+            for trade in summary["trade_log"]:
+                dpg.add_text(f"{trade[0]} at {trade[1]} on day {trade[2]}")    
             
        
     
