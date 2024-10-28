@@ -88,7 +88,7 @@ def backtestWindow(strat):
             dpg.add_text("% Return: " + "0")    
         elif strat == "MACD":
             # Run MACD Backtest
-            macd_backtest = MACD.MACDBacktest(historical_data)
+            macd_backtest = MACD.MACDBacktest(historical_data, symbol = "MACD")
             summary = macd_backtest.run()
             
             # Display MACD results in GUI
@@ -97,7 +97,7 @@ def backtestWindow(strat):
             dpg.add_text("Total % Return: " + str(round(summary["percent_return"], 2)) + "%")
             dpg.add_text("Trade Log:")
             for trade in summary["trade_log"]:
-                dpg.add_text(f"{trade[0]} at {trade[1]} on day {trade[2]}")    
+                dpg.add_text(f"{trade[0]}, Signal: {trade[1]}")    
             
        
     
