@@ -1,1 +1,8 @@
 historical_data.json
+*.pdf
+*.csv
+*.json
+._DataManager.py
+._Main.py
+/_pycache_
+*.pyc
