@@ -64,6 +64,7 @@ def show_graph():
             dpg.add_menu_item(label="Close Graph", callback=close_graph)
         with dpg.plot(label="Closing Prices", height=600, width=900):
             dpg.add_plot_legend()
+            dpg.add_plot_axis(dpg.mvXAxis, label="Date",time=True)
             y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Price")
             dpg.set_axis_limits_auto(y_axis)
 
@@ -134,7 +135,6 @@ with dpg.window(tag="Primary Window",width = 1100):
         year = int(dpg.get_value(yearDropdown))
         date = datetime(year,month,day)
         setupFNGU(date)
-        sma.backtest_sma(historical_data)
         show_graph()
     
     def on_button_fngd():
@@ -143,8 +143,7 @@ with dpg.window(tag="Primary Window",width = 1100):
         month = int(dpg.get_value(monthDropdown))
         year = int(dpg.get_value(yearDropdown))
         date = datetime(year,month,day)
-        setupFNGD(date)
-        sma.backtest_sma(historical_data)        
+        setupFNGD(date)     
         show_graph()       
 
     def on_button_backtest():
