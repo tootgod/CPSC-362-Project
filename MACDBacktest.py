@@ -1,34 +1,42 @@
-import pandas as pd 
+import pandas as pd  
 from datetime import datetime
 import csv
 
 class MACDBacktest:
     def __init__(self, historical_data, symbol, initial_balance=100000):
+        #ensure historical_data is a DataFrame
         if isinstance(historical_data, dict):
             historical_data = pd.DataFrame(historical_data)
+        elif isinstance(historical_data, pd.Series):
+            historical_data = historical_data.to_frame()
 
         #check the initial DataFrame structure
         print("Initial DataFrame structure:")
         print(historical_data.head())
 
-        #reset index to turn it into a column named 'Date'
-        historical_data.reset_index(inplace=True)
-        historical_data.rename(columns={'index': 'Date'}, inplace=True)
+        #if the DataFrame has no explicit index, use the index as the 'Date'
+        if 'Date' not in historical_data.columns:
+            historical_data.reset_index(inplace=True)
+            historical_data.rename(columns={'index': 'Date'}, inplace=True)
 
-        #convert the 'Date' column from Unix timestamp (milliseconds) to datetime
-        historical_data['Date'] = pd.to_datetime(historical_data['Date'], unit='ms')
+        #ensure 'Date' is a Series and check for its type
+        if not isinstance(historical_data['Date'], pd.Series):
+            raise ValueError("historical_data must have a 'Date' column as a Series.")
+
+        #convert the 'Date' column to datetime
+        historical_data['Date'] = pd.to_datetime(pd.to_numeric(historical_data['Date']), unit='ms', errors='coerce')
+
+        #check for any conversion issues
+        if historical_data['Date'].isnull().any():
+            print("Warning: Some dates could not be converted. Check your data.")
 
         #print the DataFrame after conversion
         print("DataFrame after Date conversion:")
         print(historical_data.head())
 
-        #check the column names
-        print("Column names in historical_data:")
-        print(historical_data.columns)
-
-        #initialization of local vars
-        self.dates = pd.Series(historical_data['Date'])  # This should now work
-        self.closes = pd.Series(historical_data['Close'])
+        #initialization of local variables
+        self.dates = historical_data['Date']  #directly reference the column
+        self.closes = historical_data['Close']
         self.symbol = symbol
         self.initial_balance = initial_balance
         self.balance = initial_balance
@@ -36,6 +44,7 @@ class MACDBacktest:
         self.trades = []
         self.annual_return = 0
         self.total_return = 0
+        self.historical_data = historical_data.reset_index(drop=True)
 
     def calculate_macd(self, short_window=12, long_window=26, signal_window=9):
         short_ema = self.closes.ewm(span=short_window, adjust=False).mean()
