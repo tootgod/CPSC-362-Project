@@ -8,11 +8,11 @@ This also includes backtesting and logging evey trade that is automatically perf
 
 # Group Information
 
-Jonathan Bird
-Kyler Geesink
-Fiona Keaney
-Joon Rho
-Helen Truong
+* Jonathan Bird
+* Kyler Geesink
+* Fiona Keaney
+* Joon Rho
+* Helen Truong
 
 # Instructions 
  
