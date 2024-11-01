@@ -41,8 +41,8 @@ def BB_backtest(historical_data, period=20, symbol = 'BB', initial_balance=10000
         lower = df['LowerBand'].iloc[i]
         mid_line = df['MiddleLine'].iloc[i]
         
-        '''add more signals and reactions to bollinger band actions
-        such as: "narrow/narrowing bands", "wide/widening bands", "lower band bounce", "upper band bounce", etc''' 
+        '''add more signals and reactions to bollinger band actions'''
+        '''such as: "narrow/narrowing bands", "wide/widening bands", "lower band bounce", "upper band bounce", etc''' 
         
         # Buy Signal (The middle line touches or goes under the lower band, indicating uptrend)
         if mid_line <= lower and shares_held == 0:
