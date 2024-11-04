@@ -4,6 +4,7 @@ import os
 import dearpygui.dearpygui as dpg
 import SmaBacktest as sma
 import MACDBacktest as MACD
+import BBbacktest as BB
 import utest_MACD as utest_MACD
 import itest_MACD as itest_MACD
 import Security
@@ -104,6 +105,7 @@ def backtestWindow(strat):
             dpg.add_text("Total gain/loss: " + "0")
             dpg.add_text("% Return: " + "0")
         elif strat == "BB":
+            BB.BB_backtest(historical_data)
             dpg.add_text("BB Backtest Results")
             dpg.add_text("Total gain/loss: " + "0")
             dpg.add_text("% Return: " + "0")    

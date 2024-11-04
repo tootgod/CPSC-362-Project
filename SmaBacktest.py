@@ -9,7 +9,7 @@ def calculate_sma(data, window):
     return data.rolling(window=window).mean()
 
 # Perform the SMA cross-over backtest
-def backtest_sma(historical_data, short_window=50, long_window=200, initial_balance=100000, symbol="ETF"):
+def backtest_sma(historical_data, short_window=50, long_window=200, initial_balance=100000, symbol="SMA"):
     dates = dm.getJsonDates(historical_data)
     closes = dm.getJsonCloses(historical_data)
 

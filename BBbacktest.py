@@ -93,4 +93,4 @@ def BB_backtest(historical_data, period=20, symbol = 'BB', initial_balance=10000
     return balance, total_gain_loss, annual_return, total_return
 
       
-BB_backtest(dm.loadData(), 20, 'BB', 100000, 2)
+#BB_backtest(dm.loadData(), 20, 'BB', 100000, 2)
