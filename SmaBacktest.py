@@ -115,3 +115,6 @@ def save_trade_log(trade_log, filename):
         dict_writer.writeheader()
         dict_writer.writerows(trade_log)
     print(f'Trade log saved to {filename}')
+
+#driver code: comment out when running the main program
+#backtest_sma(dm.loadData())

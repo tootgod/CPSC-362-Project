@@ -23,12 +23,18 @@ def BB_backtest(historical_data, period=20, symbol = 'BB', initial_balance=10000
     trade_log = []
     
     # Upper and lower bands of BB
+    upper = []
+    lower = []
     # Standard Deviation is multiplied by 2 by default
     for i in range(len(df)):
-        upper.append(df['MiddleLine'].iloc[i] + (df['StdDeviation'].iloc[i] * std_dMult)
-        lower.append(df['MiddleLine'].iloc[i] - (df['StdDeviation'].iloc[i] * std_dMult)
+        upper.append(df['MiddleLine'].iloc[i] + (df['StdDeviation'].iloc[i] * std_dMult))
+        lower.append(df['MiddleLine'].iloc[i] - (df['StdDeviation'].iloc[i] * std_dMult))
 
     df = pd.DataFrame({
+
+        'Date': pd.to_datetime(dates),
+        'Close': closes,
+        'MiddleLine': df['MiddleLine'],
         'UpperBand': upper,
         'LowerBand': lower
     })
@@ -66,7 +72,7 @@ def BB_backtest(historical_data, period=20, symbol = 'BB', initial_balance=10000
         transaction_amount = shares_held * final_price
         gain_loss = transaction_amount - (shares_held * df['Close'].iloc[-2])
         balance += transaction_amount
-        log_trade(trade_log, df['Date'].iloc[-1], 'SELL (Final)', symbol, final_price, shares_held, transaction_amount, balance, gain_loss)
+        sma.log_trade(trade_log, df['Date'].iloc[-1], 'SELL (Final)', symbol, final_price, shares_held, transaction_amount, balance, gain_loss)
         shares_held = 0
 
     # Calculate final performance
@@ -87,3 +93,4 @@ def BB_backtest(historical_data, period=20, symbol = 'BB', initial_balance=10000
     return balance, total_gain_loss, annual_return, total_return
 
       
+BB_backtest(dm.loadData(), 20, 'BB', 100000, 2)
