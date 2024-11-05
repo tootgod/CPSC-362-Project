@@ -98,7 +98,7 @@ def run_tests():
 
 
 def backtestWindow(strat):
-    with dpg.window(label=strat,width = 200,height=100):
+    with dpg.window(label=strat,width = 950,height=700):
         if strat == "SMA":
             sma.backtest_sma(historical_data)
             dpg.add_text("SMA Backtest Results")
@@ -118,10 +118,21 @@ def backtestWindow(strat):
             dpg.add_text("MACD Backtest Results")
             dpg.add_text("Final Balance: $" + str(round(summary["final_balance"], 2)))
             dpg.add_text("Total % Return: " + str(round(summary["percent_return"], 2)) + "%")
-            dpg.add_text("Trade Log:")
+            #dpg.add_text("Trade Log:")
+            amnt = [100000]
+            num = [0]
             for trade in summary["trade_log"]:
-                dpg.add_text(f"{trade[0]}, Signal: {trade[1]}, Shares: {trade[4]}, Amount: ${trade[5]:,.2f}")
-            
+                #dpg.add_text(f"{trade[0]}, Signal: {trade[1]}, Shares: {trade[4]}, Amount: ${trade[5]:,.2f}")
+                amnt.append(trade[5])
+                num.append(num[-1]+1)
+            with dpg.plot(label="Closing Prices", height=600, width=900):
+                dpg.add_plot_legend()
+                dpg.add_plot_axis(dpg.mvXAxis, label="Trade number")
+                y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
+                dpg.set_axis_limits_auto(y_axis)
+
+                dpg.add_line_series(num, amnt, parent=y_axis, label="Line Data")
+        
             run_tests()
             
        
