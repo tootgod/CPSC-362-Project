@@ -41,12 +41,12 @@ class MACDBacktest(Backtest):
         return self.balance, self.total_return, self.trades
 
 
-historical_data = dm.loadData()  # Assuming `dm.loadData()` loads your data correctly.
+#historical_data = dm.loadData()  # Assuming `dm.loadData()` loads your data correctly.
 
 # Create an instance of SMABacktest
-macd_backtest = MACDBacktest(historical_data, symbol="MACD")
+#macd_backtest = MACDBacktest(historical_data, symbol="MACD")
 
 # Now call the backtest method on the instance
-result = macd_backtest.run()  # or sma_backtest.backtest() if you are testing that directly
-print(result)
+#result = macd_backtest.run()  # or sma_backtest.backtest() if you are testing that directly
+#print(result)
 
