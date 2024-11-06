@@ -42,11 +42,11 @@ class SMABacktest(Backtest):
         return self.balance, self.total_return, self.trades
 
 # Ensure you've already instantiated the historical data as a DataFrame, for example:
-historical_data = dm.loadData()  # Assuming `dm.loadData()` loads your data correctly.
+#historical_data = dm.loadData()  # Assuming `dm.loadData()` loads your data correctly.
 
 # Create an instance of SMABacktest
-sma_backtest = SMABacktest(historical_data, symbol="AAPL")
+#sma_backtest = SMABacktest(historical_data, symbol="AAPL")
 
 # Now call the backtest method on the instance
-result = sma_backtest.run()  # or sma_backtest.backtest() if you are testing that directly
-print(result)
+#result = sma_backtest.run()  # or sma_backtest.backtest() if you are testing that directly
+#print(result)
