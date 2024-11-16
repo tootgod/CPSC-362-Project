@@ -4,5 +4,5 @@ historical_data.json
 *.json
 ._DataManager.py
 ._Main.py
-/_pycache_
+__pycache__/*
 *.pyc
