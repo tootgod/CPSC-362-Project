@@ -1,49 +1,30 @@
-import DataManager as dm
 from datetime import datetime
 import os
 import dearpygui.dearpygui as dpg
 import SmaBacktest as sma
 import MACDBacktest as MACD
+import BBbacktest as BB
 import utest_MACD as utest_MACD
 import itest_MACD as itest_MACD
 import Security
 import unittest
-
-historical_data = None
 sec = None
 graphLabel = "Loaded Data"
-
-#load historical data
-def setupHistoricalData():
-    global historical_data, sec
-    historical_data = dm.loadData()
-    sec = Security.security(historical_data)
     
-    
-#download FNGU data and load it
-def setupFNGU(date):
-    global graphLabel
-    graphLabel = "FNGU"
-    dm.downloadFNGU(date)
+#download Specified Ticker data and load it
+def setupTicker(date,ticker):
+    global graphLabel,sec
+    graphLabel = ticker
+    sec = Security.security(date,ticker)
     if os.path.exists('historical_data.json'):
-        setupHistoricalData()
-    else:
-        print("Error: File not found")
-#download FNGD data and load it
-def setupFNGD(date):
-    global graphLabel
-    graphLabel = "FNGD"
-    dm.downloadFNGD(date)
-    if os.path.exists('historical_data.json'):
-        setupHistoricalData()
+        sec = Security.security(ticker)
     else:
         print("Error: File not found")
     
 
 #check if json exists and load it if it does
 if os.path.exists('historical_data.json'):
-    setupHistoricalData()
-
+    sec = Security.security()
 
    
 
@@ -97,29 +78,66 @@ def run_tests():
 
 
 def backtestWindow(strat):
-    with dpg.window(label=strat,width = 200,height=100):
+    with dpg.window(label=strat,width = 950,height=700):
         if strat == "SMA":
-            sma.backtest_sma(historical_data)
+            balance, total_gain_loss, annual_return, total_return,balanceList,num = sma.backtest_sma(sec)
             dpg.add_text("SMA Backtest Results")
-            dpg.add_text("Total gain/loss: " + "0")
-            dpg.add_text("% Return: " + "0")
+            dpg.add_text(f"Final Balance: ${balance:,.2f}")
+            dpg.add_text(f"Total Gain/Loss: ${total_gain_loss:,.2f}")
+            dpg.add_text(f"Annual Return: {annual_return:.2f}%")
+            dpg.add_text(f"Total Return: {total_return:.2f}%")
+
+            with dpg.plot(label="Closing Prices", height=600, width=900):
+                dpg.add_plot_legend()
+                dpg.add_plot_axis(dpg.mvXAxis, label="Trade number")
+                y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
+                dpg.set_axis_limits_auto(y_axis)
+
+                dpg.add_line_series(num,balanceList,parent=y_axis, label="Line Data")
         elif strat == "BB":
+            # Run BB_backtest and display results
+            balance, total_gain_loss, annual_return, total_return,balanceList,num = BB.BB_backtest(sec)
             dpg.add_text("BB Backtest Results")
-            dpg.add_text("Total gain/loss: " + "0")
-            dpg.add_text("% Return: " + "0")    
+            dpg.add_text(f"Final Balance: ${balance:,.2f}")
+            dpg.add_text(f"Total Gain/Loss: ${total_gain_loss:,.2f}")
+            dpg.add_text(f"Annual Return: {annual_return:.2f}%")
+            dpg.add_text(f"Total Return: {total_return:.2f}%")
+            with dpg.plot(label="Closing Prices", height=600, width=900):
+                dpg.add_plot_legend()
+                dpg.add_plot_axis(dpg.mvXAxis, label="Trade number")
+                y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
+                dpg.set_axis_limits_auto(y_axis)
+
+                dpg.add_line_series(num,balanceList,parent=y_axis, label="Line Data")
         elif strat == "MACD":
             # Run MACD Backtest
-            macd_backtest = MACD.MACDBacktest(historical_data, symbol = "MACD")
+            macd_backtest = MACD.MACDBacktest(sec.historical_data, symbol = "MACD")
             summary = macd_backtest.run()
             
             # Display MACD results in GUI
             dpg.add_text("MACD Backtest Results")
             dpg.add_text("Final Balance: $" + str(round(summary["final_balance"], 2)))
             dpg.add_text("Total % Return: " + str(round(summary["percent_return"], 2)) + "%")
-            dpg.add_text("Trade Log:")
+            #dpg.add_text("Trade Log:")
+            amnt = [100000]
+            num = [0]
             for trade in summary["trade_log"]:
-                dpg.add_text(f"{trade[0]}, Signal: {trade[1]}, Shares: {trade[4]}, Amount: ${trade[5]:,.2f}")
-            
+                #dpg.add_text(f"{trade[0]}, Signal: {trade[1]}, Shares: {trade[4]}, Amount: ${trade[5]:,.2f}")
+                amnt.append(trade[5])
+                num.append(num[-1]+1)
+            with dpg.plot(label="Closing Prices", height=600, width=900):
+                dpg.add_plot_legend()
+                dpg.add_plot_axis(dpg.mvXAxis, label="Trade number")
+                y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
+                dpg.set_axis_limits_auto(y_axis)
+
+                dpg.add_line_series(num, amnt, parent=y_axis, label="Line Data")
+                
+                macd_line, signal_line = macd_backtest.calculate_macd()
+                dpg.add_line_series(sec.historical_dates, sec.historical_closes, parent=y_axis, label="Price")
+                dpg.add_line_series(sec.historical_dates, macd_line, parent=y_axis, label="MACD", color=(255, 0, 0))  # Red for MACD line
+                dpg.add_line_series(sec.historical_dates, signal_line, parent=y_axis, label="Signal", color=(0, 0, 255))  # Blue for Signal line
+        
             run_tests()
             
        
@@ -134,7 +152,7 @@ with dpg.window(tag="Primary Window",width = 1100):
         month = int(dpg.get_value(monthDropdown))
         year = int(dpg.get_value(yearDropdown))
         date = datetime(year,month,day)
-        setupFNGU(date)
+        setupTicker(date,"FNGU")
         show_graph()
     
     def on_button_fngd():
@@ -143,7 +161,7 @@ with dpg.window(tag="Primary Window",width = 1100):
         month = int(dpg.get_value(monthDropdown))
         year = int(dpg.get_value(yearDropdown))
         date = datetime(year,month,day)
-        setupFNGD(date)     
+        setupTicker(date,"FNGD")     
         show_graph()       
 
     def on_button_backtest():

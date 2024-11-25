@@ -83,7 +83,7 @@ class MACDBacktest:
 
         return self.balance, self.total_return, self.trades
 
-    def save_to_csv(self, filename="ETF_trade_log.csv"):
+    def save_to_csv(self, filename="MacD_trade_log.csv"):
         with open(filename, mode="a", newline="") as file:
             writer = csv.writer(file)
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
