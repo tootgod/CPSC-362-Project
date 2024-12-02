@@ -11,8 +11,8 @@ class MACDBacktest:
             historical_data = historical_data.to_frame()
 
         #check the initial DataFrame structure
-        print("Initial DataFrame structure:")
-        print(historical_data.head())
+        #print("Initial DataFrame structure:")
+        #print(historical_data.head())
 
         #if the DataFrame has no explicit index, use the index as the 'Date'
         if 'Date' not in historical_data.columns:
@@ -31,8 +31,8 @@ class MACDBacktest:
             print("Warning: Some dates could not be converted. Check your data.")
 
         #print the DataFrame after conversion
-        print("DataFrame after Date conversion:")
-        print(historical_data.head())
+        #print("DataFrame after Date conversion:")
+        #print(historical_data.head())
 
         #initialization of local variables
         self.dates = historical_data['Date']  #directly reference the column
@@ -57,31 +57,43 @@ class MACDBacktest:
 
     def backtest_macd(self):
         macd_line, signal_line = self.calculate_macd()
-        
+        transactionDatesp = []
+        transactionDatesn = []
+        transactionHeightp = []
+        transactionHeightn = []
         for i in range(1, len(macd_line)):
             date = self.dates.iloc[i]  #iloc to access the correct index
             price = self.closes.iloc[i] 
+            
             
             #buy signal: MACD line crosses above Signal line
             if macd_line[i] > signal_line[i] and macd_line[i - 1] <= signal_line[i - 1] and self.position == 0:
                 self.position = 1
                 self.shares = self.balance // price
                 transaction_amount = self.shares * price
+                transactionDatesp.append(int(self.dates.iloc[i-1].timestamp()))
+                transactionDatesn.append(int(date.timestamp()))
+                transactionHeightp.append(macd_line[i-1])
+                transactionHeightn.append(macd_line[i])
                 self.balance -= transaction_amount
                 self.trades.append((date, 'Buy', self.symbol, price, self.shares, transaction_amount, 0, self.balance, self.total_return))
-                print(f"Buying at {price} on {date}")
+                #print(f"Buying at {price} on {date}")
 
             #sell signal: MACD line crosses below Signal line
             elif macd_line[i] < signal_line[i] and macd_line[i - 1] >= signal_line[i - 1] and self.position == 1:
                 self.position = 0
                 transaction_amount = self.shares * price
+                transactionDatesp.append(int(self.dates.iloc[i-1].timestamp()))
+                transactionDatesn.append(int(date.timestamp()))
+                transactionHeightp.append(macd_line[i-1])
+                transactionHeightn.append(macd_line[i])
                 gain_loss = transaction_amount - self.trades[-1][5]
                 self.balance += transaction_amount
                 self.total_return = ((self.balance - self.initial_balance) / self.initial_balance) * 100
                 self.trades.append((date, 'Sell', self.symbol, price, self.shares, transaction_amount, gain_loss, self.balance, self.total_return))
-                print(f"Selling at {price} on {date}, Gain/Loss: {gain_loss}")
+                #print(f"Selling at {price} on {date}, Gain/Loss: {gain_loss}")
 
-        return self.balance, self.total_return, self.trades
+        return self.balance, self.total_return, self.trades, transactionDatesp,transactionDatesn, transactionHeightp,transactionHeightn
 
     def save_to_csv(self, filename="MacD_trade_log.csv"):
         with open(filename, mode="a", newline="") as file:
@@ -94,11 +106,11 @@ class MACDBacktest:
                 writer.writerow(trade)
 
     def run(self):
-        final_balance, percent_return, trade_log = self.backtest_macd()
+        final_balance, percent_return, trade_log,transactionDatesp,transactionDatesn, transactionHeightp,transactionHeightn = self.backtest_macd()
         self.save_to_csv()
         summary = {
             "final_balance": final_balance,
             "percent_return": percent_return,
             "trade_log": trade_log
         }
-        return summary
+        return summary, transactionDatesp,transactionDatesn,transactionHeightp,transactionHeightn

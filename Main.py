@@ -74,7 +74,7 @@ def run_tests():
     results = runner.run(suite)
 
     # Print the test results
-    print(f"Tests run: {results.testsRun}, Failures: {len(results.failures)}, Errors: {len(results.errors)}")
+    #print(f"Tests run: {results.testsRun}, Failures: {len(results.failures)}, Errors: {len(results.errors)}")
 
 
 def backtestWindow(strat):
@@ -104,7 +104,7 @@ def backtestWindow(strat):
             dpg.add_text(f"Total Return: {total_return:.2f}%")
             with dpg.plot(label="Closing Prices", height=600, width=900):
                 dpg.add_plot_legend()
-                dpg.add_plot_axis(dpg.mvXAxis, label="Trade number")
+                dpg.add_plot_axis(dpg.mvXAxis, label="Trade number",time=True)
                 y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
                 dpg.set_axis_limits_auto(y_axis)
 
@@ -112,7 +112,7 @@ def backtestWindow(strat):
         elif strat == "MACD":
             # Run MACD Backtest
             macd_backtest = MACD.MACDBacktest(sec.historical_data, symbol = "MACD")
-            summary = macd_backtest.run()
+            summary ,tdatep,tdaten,tHeightp,tHeightn = macd_backtest.run()
             
             # Display MACD results in GUI
             dpg.add_text("MACD Backtest Results")
@@ -127,16 +127,24 @@ def backtestWindow(strat):
                 num.append(num[-1]+1)
             with dpg.plot(label="Closing Prices", height=600, width=900):
                 dpg.add_plot_legend()
-                dpg.add_plot_axis(dpg.mvXAxis, label="Trade number")
+                dpg.add_plot_axis(dpg.mvXAxis, label="Trade number",time=True)
                 y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
                 dpg.set_axis_limits_auto(y_axis)
 
-                dpg.add_line_series(num, amnt, parent=y_axis, label="Line Data")
+                #dpg.add_line_series(num, amnt, parent=y_axis, label="Line Data")
                 
                 macd_line, signal_line = macd_backtest.calculate_macd()
-                dpg.add_line_series(sec.historical_dates, sec.historical_closes, parent=y_axis, label="Price")
-                dpg.add_line_series(sec.historical_dates, macd_line, parent=y_axis, label="MACD", color=(255, 0, 0))  # Red for MACD line
-                dpg.add_line_series(sec.historical_dates, signal_line, parent=y_axis, label="Signal", color=(0, 0, 255))  # Blue for Signal line
+                macd_line = macd_line.to_list()
+                signal_line = signal_line.to_list()
+                #print("tdate Line:")
+                #print(tdate)
+                #print("tHeight Line:")
+                #print(tHeight)
+                #dpg.add_line_series(sec.historical_dates, sec.historical_closes, parent=y_axis, label="Price")
+                dpg.add_scatter_series(tdaten,tHeightn,parent=y_axis, label="MACD_Line After Transaction")
+                dpg.add_scatter_series(tdatep,tHeightp,parent=y_axis, label="MACD_Line Before Transaction")
+                dpg.add_line_series(sec.historical_dates, macd_line, parent=y_axis, label="MACD")  # Red for MACD line
+                dpg.add_line_series(sec.historical_dates, signal_line, parent=y_axis, label="Signal")  # Blue for Signal line
         
             run_tests()
             
