@@ -93,13 +93,13 @@ def backtestWindow(strat):
                 y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
                 dpg.set_axis_limits_auto(y_axis)
 
-                dpg.add_scatter_series(tdaten,tHeightn,parent=y_axis, label="MACD_Line After Transaction")
-                dpg.add_scatter_series(tdatep,tHeightp,parent=y_axis, label="MACD_Line Before Transaction")
-                dpg.add_line_series(sec.historical_dates,smasmalllist,parent=y_axis, label="Line Data")
-                dpg.add_line_series(sec.historical_dates,smabiglist,parent=y_axis, label="Line Data")
+                dpg.add_scatter_series(tdaten,tHeightn,parent=y_axis, label="SmaShort After Transaction")
+                dpg.add_scatter_series(tdatep,tHeightp,parent=y_axis, label="SmaShort Before Transaction")
+                dpg.add_line_series(sec.historical_dates,smasmalllist,parent=y_axis, label="SMA Short Data")
+                dpg.add_line_series(sec.historical_dates,smabiglist,parent=y_axis, label="SMA Long Data")
         elif strat == "BB":
             # Run BB_backtest and display results
-            balance, total_gain_loss, annual_return, total_return,balanceList,num = BB.BB_backtest(sec)
+            balance, total_gain_loss, annual_return, total_return,balanceList,num,mband,uband,lband,tDateB,tDateS,tHeightb,tHeightS = BB.BB_backtest(sec)
             dpg.add_text("BB Backtest Results")
             dpg.add_text(f"Final Balance: ${balance:,.2f}")
             dpg.add_text(f"Total Gain/Loss: ${total_gain_loss:,.2f}")
@@ -111,11 +111,16 @@ def backtestWindow(strat):
                 y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
                 dpg.set_axis_limits_auto(y_axis)
 
-                dpg.add_line_series(num,balanceList,parent=y_axis, label="Line Data")
+                dpg.add_scatter_series(tDateB,tHeightb,parent=y_axis, label="Buy Signal")
+                dpg.add_scatter_series(tDateS,tHeightS,parent=y_axis, label="Sell Signal")
+                dpg.add_line_series(sec.historical_dates, sec.historical_closes, parent=y_axis, label="Closes")
+                dpg.add_line_series(sec.historical_dates,mband,parent=y_axis, label="Middle Band")
+                dpg.add_line_series(sec.historical_dates,uband,parent=y_axis, label="Upper Band")
+                dpg.add_line_series(sec.historical_dates,lband,parent=y_axis, label="Lower Band")
         elif strat == "MACD":
             # Run MACD Backtest
             macd_backtest = MACD.MACDBacktest(sec.historical_data, symbol = "MACD")
-            summary ,c = macd_backtest.run()
+            summary ,tdatep,tdaten,tHeightp,tHeightn = macd_backtest.run()
             
             # Display MACD results in GUI
             dpg.add_text("MACD Backtest Results")

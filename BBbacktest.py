@@ -2,7 +2,7 @@ import pandas as pd
 import SmaBacktest as sma
 
 def BB_backtest(sec, period=20, symbol='BB', initial_balance=100000, std_dMult=0.8):
-    # Load dates and close prices from DataManager
+    # Load dates and close prices from a Security object
     dates = sec.historical_dates
     closes = sec.historical_closes
 
@@ -36,6 +36,13 @@ def BB_backtest(sec, period=20, symbol='BB', initial_balance=100000, std_dMult=0
 
     balanceList = [initial_balance]
     num = [0]
+
+    #variables for the trade graph
+    transactionDatessell = []
+    transactionDatesbuy = []
+    transactionHeightsell = []
+    transactionHeightbuy = []
+
     # Begin backtesting, starting only after `period` rows to avoid NaN values
     for i in range(period, len(df)):
         date = df.index[i]
@@ -71,6 +78,9 @@ def BB_backtest(sec, period=20, symbol='BB', initial_balance=100000, std_dMult=0
             num.append(num[-1]+1)
             shares_held = shares_bought
             days_since_buy = 0  # Reset holding period after buy
+            transactionDatesbuy.append(int(df['DateUnix'].iloc[i]))
+            transactionHeightbuy.append(df['MiddleLine'].iloc[i])
+
             sma.log_trade(trade_log, date, 'BUY', symbol, price, shares_bought, transaction_amount, balance)
             print(f"  - Executing BUY on {date} at price {price}")
 
@@ -91,6 +101,8 @@ def BB_backtest(sec, period=20, symbol='BB', initial_balance=100000, std_dMult=0
             balance += transaction_amount
             balanceList.append(balanceList[-1] + transaction_amount)
             num.append(num[-1]+1)
+            transactionDatessell.append(int(df['DateUnix'].iloc[i]))
+            transactionHeightsell.append(df["MiddleLine"].iloc[i])
             sma.log_trade(trade_log, date, 'SELL', symbol, price, shares_held, transaction_amount, balance, gain_loss)
             shares_held = 0  # Reset shares held after selling
             days_since_buy = 0  # Reset holding period after sell
@@ -127,5 +139,5 @@ def BB_backtest(sec, period=20, symbol='BB', initial_balance=100000, std_dMult=0
     print("Attempting to save trade log...")
     sma.save_trade_log(trade_log, f'{symbol}_trade_log.csv')
     print("Trade log saved successfully.")
-    return balance, total_gain_loss, annual_return, total_return, balanceList, num
+    return balance, total_gain_loss, annual_return, total_return, balanceList, num, df['MiddleLine'].to_list(), df['UpperBand'].to_list(), df['LowerBand'].to_list(),transactionDatesbuy,transactionDatessell,transactionHeightbuy,transactionHeightsell
 
