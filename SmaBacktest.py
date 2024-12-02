@@ -39,6 +39,7 @@ def backtest_sma(sec, short_window=25, long_window=75, initial_balance=100000, s
     transactionHeightp = []
     transactionHeightn = []
 
+
     # Backtest logic
     for i in range(1, len(df)):
         date = df['Date'].iloc[i]
@@ -60,6 +61,7 @@ def backtest_sma(sec, short_window=25, long_window=75, initial_balance=100000, s
             transactionDatesn.append(int(df['Date'].iloc[i].timestamp()))
             transactionHeightp.append(df['SMA50'].iloc[i-1])
             transactionHeightn.append(df['SMA50'].iloc[i])
+
 
         # Sell signal
         elif df['SMA50'].iloc[i - 1] > df['SMA200'].iloc[i - 1] and sma50 < sma200 and shares_held > 0:
@@ -102,6 +104,7 @@ def backtest_sma(sec, short_window=25, long_window=75, initial_balance=100000, s
 
     # Save the log as CSV
     save_trade_log(trade_log, f'{symbol}_trade_log.csv')
+
 
     return balance, total_gain_loss, annual_return, total_return, balanceList, num,sma200list,sma50list,transactionDatesp,transactionDatesn,transactionHeightp,transactionHeightn
 

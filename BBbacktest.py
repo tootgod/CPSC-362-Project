@@ -3,6 +3,7 @@ import SmaBacktest as sma
 
 def BB_backtest(sec, period=20, symbol='BB', initial_balance=100000, std_dMult=0.8):
     # Load dates and close prices from a Security object
+
     dates = sec.historical_dates
     closes = sec.historical_closes
 
@@ -101,6 +102,7 @@ def BB_backtest(sec, period=20, symbol='BB', initial_balance=100000, std_dMult=0
             balance += transaction_amount
             balanceList.append(balanceList[-1] + transaction_amount)
             num.append(num[-1]+1)
+
             transactionDatessell.append(int(df['DateUnix'].iloc[i]))
             transactionHeightsell.append(df["MiddleLine"].iloc[i])
             sma.log_trade(trade_log, date, 'SELL', symbol, price, shares_held, transaction_amount, balance, gain_loss)
@@ -140,4 +142,5 @@ def BB_backtest(sec, period=20, symbol='BB', initial_balance=100000, std_dMult=0
     sma.save_trade_log(trade_log, f'{symbol}_trade_log.csv')
     print("Trade log saved successfully.")
     return balance, total_gain_loss, annual_return, total_return, balanceList, num, df['MiddleLine'].to_list(), df['UpperBand'].to_list(), df['LowerBand'].to_list(),transactionDatesbuy,transactionDatessell,transactionHeightbuy,transactionHeightsell
+
 

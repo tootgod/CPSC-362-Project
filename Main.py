@@ -81,6 +81,7 @@ def backtestWindow(strat):
     with dpg.window(label=strat,width = 950,height=700):
         if strat == "SMA":
             balance, total_gain_loss, annual_return, total_return,balanceList,num,smasmalllist,smabiglist,tdatep,tdaten,tHeightp,tHeightn = sma.backtest_sma(sec)
+
             dpg.add_text("SMA Backtest Results")
             dpg.add_text(f"Final Balance: ${balance:,.2f}")
             dpg.add_text(f"Total Gain/Loss: ${total_gain_loss:,.2f}")
@@ -92,7 +93,6 @@ def backtestWindow(strat):
                 dpg.add_plot_axis(dpg.mvXAxis, label="Trade number")
                 y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
                 dpg.set_axis_limits_auto(y_axis)
-
                 dpg.add_scatter_series(tdaten,tHeightn,parent=y_axis, label="SmaShort After Transaction")
                 dpg.add_scatter_series(tdatep,tHeightp,parent=y_axis, label="SmaShort Before Transaction")
                 dpg.add_line_series(sec.historical_dates,smasmalllist,parent=y_axis, label="SMA Short Data")
@@ -107,6 +107,7 @@ def backtestWindow(strat):
             dpg.add_text(f"Total Return: {total_return:.2f}%")
             with dpg.plot(label="Closing Prices", height=600, width=900):
                 dpg.add_plot_legend()
+
                 dpg.add_plot_axis(dpg.mvXAxis, label="Trade number",time=True)
                 y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
                 dpg.set_axis_limits_auto(y_axis)
