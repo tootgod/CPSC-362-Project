@@ -80,7 +80,7 @@ def run_tests():
 def backtestWindow(strat):
     with dpg.window(label=strat,width = 950,height=700):
         if strat == "SMA":
-            balance, total_gain_loss, annual_return, total_return,balanceList,num = sma.backtest_sma(sec)
+            balance, total_gain_loss, annual_return, total_return,balanceList,num,smasmalllist,smabiglist,tdatep,tdaten,tHeightp,tHeightn = sma.backtest_sma(sec)
             dpg.add_text("SMA Backtest Results")
             dpg.add_text(f"Final Balance: ${balance:,.2f}")
             dpg.add_text(f"Total Gain/Loss: ${total_gain_loss:,.2f}")
@@ -93,7 +93,10 @@ def backtestWindow(strat):
                 y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
                 dpg.set_axis_limits_auto(y_axis)
 
-                dpg.add_line_series(num,balanceList,parent=y_axis, label="Line Data")
+                dpg.add_scatter_series(tdaten,tHeightn,parent=y_axis, label="MACD_Line After Transaction")
+                dpg.add_scatter_series(tdatep,tHeightp,parent=y_axis, label="MACD_Line Before Transaction")
+                dpg.add_line_series(sec.historical_dates,smasmalllist,parent=y_axis, label="Line Data")
+                dpg.add_line_series(sec.historical_dates,smabiglist,parent=y_axis, label="Line Data")
         elif strat == "BB":
             # Run BB_backtest and display results
             balance, total_gain_loss, annual_return, total_return,balanceList,num = BB.BB_backtest(sec)
@@ -112,7 +115,7 @@ def backtestWindow(strat):
         elif strat == "MACD":
             # Run MACD Backtest
             macd_backtest = MACD.MACDBacktest(sec.historical_data, symbol = "MACD")
-            summary ,tdatep,tdaten,tHeightp,tHeightn = macd_backtest.run()
+            summary ,c = macd_backtest.run()
             
             # Display MACD results in GUI
             dpg.add_text("MACD Backtest Results")
