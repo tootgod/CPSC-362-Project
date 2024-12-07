@@ -57,8 +57,8 @@ def backtest_sma(sec, short_window=25, long_window=75, initial_balance=100000, s
             shares_held = shares_bought
             log_trade(trade_log, date, 'BUY', symbol, price, shares_bought, transaction_amount, balance)
             print(f"Logged BUY trade: {trade_log[-1]}")  # Debug print
-            transactionDatesp.append(int(df['Date'].iloc[i-1].timestamp()))
-            transactionDatesn.append(int(df['Date'].iloc[i].timestamp()))
+            transactionDatesp.append(sec.historical_dates[i-1])
+            transactionDatesn.append(sec.historical_dates[i])
             transactionHeightp.append(df['SMA50'].iloc[i-1])
             transactionHeightn.append(df['SMA50'].iloc[i])
 
@@ -72,6 +72,10 @@ def backtest_sma(sec, short_window=25, long_window=75, initial_balance=100000, s
             num.append(num[-1]+1)
             log_trade(trade_log, date, 'SELL', symbol, price, shares_held, transaction_amount, balance, gain_loss)
             shares_held = 0
+            transactionDatesp.append(sec.historical_dates[i-1])
+            transactionDatesn.append(sec.historical_dates[i])
+            transactionHeightp.append(df['SMA50'].iloc[i-1])
+            transactionHeightn.append(df['SMA50'].iloc[i])
             print(f"Logged SELL trade: {trade_log[-1]}")  # Debug print
 
     # Final sell if shares are still held
