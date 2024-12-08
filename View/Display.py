@@ -1,12 +1,12 @@
 from datetime import datetime
 import os
 import dearpygui.dearpygui as dpg
-import SmaBacktest as sma
-import MACDBacktest as MACD
-import BBbacktest as BB
+import Controller.SmaBacktest as sma
+import Controller.MACDBacktest as MACD
+import Controller.BBbacktest as BB
 import utest_MACD as utest_MACD
 import itest_MACD as itest_MACD
-import Security
+import Model.Security as Security
 import unittest
 sec = None
 graphLabel = "Loaded Data"
