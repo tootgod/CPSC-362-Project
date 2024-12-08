@@ -34,10 +34,10 @@ def backtest_sma(sec, short_window=25, long_window=75, initial_balance=100000, s
     num = [0]
     
     #variables for the trade graph
-    transactionDatesp = []
-    transactionDatesn = []
-    transactionHeightp = []
-    transactionHeightn = []
+    transactionDatesSell = []
+    transactionDatesBuy = []
+    transactionHeightSell = []
+    transactionHeightBuy = []
 
 
     # Backtest logic
@@ -57,10 +57,8 @@ def backtest_sma(sec, short_window=25, long_window=75, initial_balance=100000, s
             shares_held = shares_bought
             log_trade(trade_log, date, 'BUY', symbol, price, shares_bought, transaction_amount, balance)
             print(f"Logged BUY trade: {trade_log[-1]}")  # Debug print
-            transactionDatesp.append(sec.historical_dates[i-1])
-            transactionDatesn.append(sec.historical_dates[i])
-            transactionHeightp.append(df['SMA50'].iloc[i-1])
-            transactionHeightn.append(df['SMA50'].iloc[i])
+            transactionDatesBuy.append(sec.historical_dates[i])
+            transactionHeightBuy.append(df['SMA50'].iloc[i])
 
 
         # Sell signal
@@ -72,10 +70,8 @@ def backtest_sma(sec, short_window=25, long_window=75, initial_balance=100000, s
             num.append(num[-1]+1)
             log_trade(trade_log, date, 'SELL', symbol, price, shares_held, transaction_amount, balance, gain_loss)
             shares_held = 0
-            transactionDatesp.append(sec.historical_dates[i-1])
-            transactionDatesn.append(sec.historical_dates[i])
-            transactionHeightp.append(df['SMA50'].iloc[i-1])
-            transactionHeightn.append(df['SMA50'].iloc[i])
+            transactionDatesSell.append(sec.historical_dates[i])
+            transactionHeightSell.append(df['SMA50'].iloc[i])
             print(f"Logged SELL trade: {trade_log[-1]}")  # Debug print
 
     # Final sell if shares are still held
@@ -110,7 +106,7 @@ def backtest_sma(sec, short_window=25, long_window=75, initial_balance=100000, s
     save_trade_log(trade_log, f'{symbol}_trade_log.csv')
 
 
-    return balance, total_gain_loss, annual_return, total_return, balanceList, num,sma200list,sma50list,transactionDatesp,transactionDatesn,transactionHeightp,transactionHeightn
+    return balance, total_gain_loss, annual_return, total_return, balanceList, num,sma200list,sma50list,transactionDatesBuy,transactionDatesSell,transactionHeightBuy,transactionHeightSell
 
 
 # Function to log each trade
