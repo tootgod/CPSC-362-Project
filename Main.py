@@ -80,7 +80,7 @@ def run_tests():
 def backtestWindow(strat):
     with dpg.window(label=strat,width = 950,height=700):
         if strat == "SMA":
-            balance, total_gain_loss, annual_return, total_return,balanceList,num,smasmalllist,smabiglist,tdatep,tdaten,tHeightp,tHeightn = sma.backtest_sma(sec)
+            balance, total_gain_loss, annual_return, total_return,balanceList,num,smasmalllist,smabiglist,tdateB,tdateS,tHeightB,tHeightS = sma.backtest_sma(sec)
 
             dpg.add_text("SMA Backtest Results")
             dpg.add_text(f"Final Balance: ${balance:,.2f}")
@@ -93,8 +93,8 @@ def backtestWindow(strat):
                 dpg.add_plot_axis(dpg.mvXAxis, label="Trade number",time=True)
                 y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
                 dpg.set_axis_limits_auto(y_axis)
-                dpg.add_scatter_series(tdaten,tHeightn,parent=y_axis, label="SmaShort After Transaction")
-                dpg.add_scatter_series(tdatep,tHeightp,parent=y_axis, label="SmaShort Before Transaction")
+                dpg.add_scatter_series(tdateB,tHeightB,parent=y_axis, label="Buy Signal")
+                dpg.add_scatter_series(tdateS,tHeightS,parent=y_axis, label="Sell Signal")
                 dpg.add_line_series(sec.historical_dates,smasmalllist,parent=y_axis, label="SMA Long Data")
                 dpg.add_line_series(sec.historical_dates,smabiglist,parent=y_axis, label="SMA Short Data")
         elif strat == "BB":
