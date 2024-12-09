@@ -90,7 +90,7 @@ class MACDBacktest:
                 self.trades.append((date, 'Sell', self.symbol, price, self.shares, transaction_amount, gain_loss, self.balance, self.total_return))
                 #print(f"Selling at {price} on {date}, Gain/Loss: {gain_loss}")
 
-        return self.balance, self.total_return, self.trades, transactionDatesSell,transactionDatesBuy, transactionHeightSell,transactionHeightBuy
+        return self.balance, self.total_return, self.trades, transactionDatesSell,transactionDatesBuy, transactionHeightSell,transactionHeightBuy, self.datesList
 
     def save_to_csv(self, filename="MacD_trade_log.csv"):
         with open(filename, mode="a", newline="") as file:
@@ -103,11 +103,11 @@ class MACDBacktest:
                 writer.writerow(trade)
 
     def run(self):
-        final_balance, percent_return, trade_log,transactionDatesBuy,transactionDatesSell, transactionHeightBuy,transactionHeightSell = self.backtest_macd()
+        final_balance, percent_return, trade_log,transactionDatesBuy,transactionDatesSell, transactionHeightBuy,transactionHeightSell,dateList = self.backtest_macd()
         self.save_to_csv()
         summary = {
             "final_balance": final_balance,
             "percent_return": percent_return,
             "trade_log": trade_log
         }
-        return summary, transactionDatesBuy,transactionDatesSell,transactionHeightBuy,transactionHeightSell
+        return summary, transactionDatesBuy,transactionDatesSell,transactionHeightBuy,transactionHeightSell,dateList
