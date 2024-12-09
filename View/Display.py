@@ -8,17 +8,18 @@ import utest_MACD as utest_MACD
 import itest_MACD as itest_MACD
 import Model.Security as Security
 import unittest
-sec = None
-graphLabel = "Loaded Data"
 
 class Display:
     def __init__(self):
-        global sec
+        self.graphLabel = "Loaded Data"
+
         #check if json exists and load it if it does
         if os.path.exists('historical_data.json'):
-            sec = Security.security()
-            sec.startAddingRandomData()
-        
+            self.sec = Security.security()
+            self.sec.startAddingRandomData()
+            
+    
+    def startup(self):
         dpg.create_context()
 
         if os.path.exists('historical_data.json'):
@@ -68,20 +69,18 @@ class Display:
 
 
     def secObserver(self, Data):
-        global sec
-        sec = Data
+        self.sec = Data
         print("Data has been updated")
         self.show_graph()
         
     #download Specified Ticker data and load it
     def setupTicker(self, date,ticker):
-        global graphLabel,sec
-        graphLabel = ticker
-        sec = Security.security(date,ticker)
-        sec.subscribe(self.secObserver)
-        sec.startAddingRandomData()
+        self.graphLabel = ticker
+        self.sec = Security.security(date,ticker)
+        self.sec.subscribe(self.secObserver)
+        self.sec.startAddingRandomData()
         if os.path.exists('historical_data.json'):
-            sec = Security.security(ticker)
+            self.sec = Security.security(ticker)
         else:
             print("Error: File not found")
         
@@ -99,7 +98,7 @@ class Display:
     #display the graph
     def show_graph(self):
         self.close_graph()
-        with dpg.window(label=graphLabel, width=950, height=675, no_title_bar=True, no_collapse=True, pos=[200, 0], no_resize=True, no_move=True, tag="Historical Data"):
+        with dpg.window(label=self.graphLabel, width=950, height=675, no_title_bar=True, no_collapse=True, pos=[200, 0], no_resize=True, no_move=True, tag="Historical Data"):
     
             def toggle_line_graph():
                 dpg.configure_item(line_graph, show=not dpg.get_item_configuration(line_graph)["show"])
@@ -115,8 +114,8 @@ class Display:
                 y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Price")
                 dpg.set_axis_limits_auto(y_axis)
 
-                line_graph = dpg.add_line_series(sec.historical_dates, sec.historical_closes, parent=y_axis, label="Line Data")
-                candle_graph = dpg.add_candle_series(sec.historical_dates, sec.historical_opens, sec.historical_closes, sec.historical_lows, sec.historical_highs, parent=y_axis, show=True, tooltip=True, label="Candle Data")
+                line_graph = dpg.add_line_series(self.sec.historical_dates, self.sec.historical_closes, parent=y_axis, label="Line Data")
+                candle_graph = dpg.add_candle_series(self.sec.historical_dates, self.sec.historical_opens, self.sec.historical_closes, self.sec.historical_lows, self.sec.historical_highs, parent=y_axis, show=True, tooltip=True, label="Candle Data")
             
             
 
@@ -146,7 +145,7 @@ class Display:
     def backtestWindow(self, strat):
         with dpg.window(label=strat,width = 950,height=700):
             if strat == "SMA":
-                balance, total_gain_loss, annual_return, total_return,balanceList,num,smasmalllist,smabiglist,tdateB,tdateS,tHeightB,tHeightS = sma.backtest_sma(sec)
+                balance, total_gain_loss, annual_return, total_return,balanceList,num,smasmalllist,smabiglist,tdateB,tdateS,tHeightB,tHeightS = sma.backtest_sma(self.sec)
 
                 dpg.add_text("SMA Backtest Results")
                 dpg.add_text(f"Final Balance: ${balance:,.2f}")
@@ -161,11 +160,11 @@ class Display:
                     dpg.set_axis_limits_auto(y_axis)
                     dpg.add_scatter_series(tdateB,tHeightB,parent=y_axis, label="Buy Signal")
                     dpg.add_scatter_series(tdateS,tHeightS,parent=y_axis, label="Sell Signal")
-                    dpg.add_line_series(sec.historical_dates,smasmalllist,parent=y_axis, label="SMA Long Data")
-                    dpg.add_line_series(sec.historical_dates,smabiglist,parent=y_axis, label="SMA Short Data")
+                    dpg.add_line_series(self.sec.historical_dates,smasmalllist,parent=y_axis, label="SMA Long Data")
+                    dpg.add_line_series(self.sec.historical_dates,smabiglist,parent=y_axis, label="SMA Short Data")
             elif strat == "BB":
                 # Run BB_backtest and display results
-                balance, total_gain_loss, annual_return, total_return,balanceList,num,mband,uband,lband,tDateB,tDateS,tHeightb,tHeightS = BB.BB_backtest(sec)
+                balance, total_gain_loss, annual_return, total_return,balanceList,num,mband,uband,lband,tDateB,tDateS,tHeightb,tHeightS = BB.BB_backtest(self.sec)
                 dpg.add_text("BB Backtest Results")
                 dpg.add_text(f"Final Balance: ${balance:,.2f}")
                 dpg.add_text(f"Total Gain/Loss: ${total_gain_loss:,.2f}")
@@ -180,13 +179,14 @@ class Display:
 
                     dpg.add_scatter_series(tDateB,tHeightb,parent=y_axis, label="Buy Signal")
                     dpg.add_scatter_series(tDateS,tHeightS,parent=y_axis, label="Sell Signal")
-                    dpg.add_line_series(sec.historical_dates, sec.historical_closes, parent=y_axis, label="Closes")
-                    dpg.add_line_series(sec.historical_dates,mband,parent=y_axis, label="Middle Band")
-                    dpg.add_line_series(sec.historical_dates,uband,parent=y_axis, label="Upper Band")
-                    dpg.add_line_series(sec.historical_dates,lband,parent=y_axis, label="Lower Band")
+                    dpg.add_line_series(self.sec.historical_dates, self.sec.historical_closes, parent=y_axis, label="Closes")
+                    dpg.add_line_series(self.sec.historical_dates,mband,parent=y_axis, label="Middle Band")
+                    dpg.add_line_series(self.sec.historical_dates,uband,parent=y_axis, label="Upper Band")
+                    dpg.add_line_series(self.sec.historical_dates,lband,parent=y_axis, label="Lower Band")
             elif strat == "MACD":
                 # Run MACD Backtest
-                macd_backtest = MACD.MACDBacktest(sec, symbol = "MACD")
+                print(self.sec)
+                macd_backtest = MACD.MACDBacktest(self.sec, symbol = "MACD")
                 summary ,tdateB,tdateS,tHeightB,tHeightS = macd_backtest.run()
                 
                 # Display MACD results in GUI
@@ -218,8 +218,8 @@ class Display:
                     #dpg.add_line_series(sec.historical_dates, sec.historical_closes, parent=y_axis, label="Price")
                     dpg.add_scatter_series(tdateB,tHeightB,parent=y_axis, label="Buy Signal")
                     dpg.add_scatter_series(tdateS,tHeightS,parent=y_axis, label="Sell Signal")
-                    dpg.add_line_series(sec.historical_dates, macd_line, parent=y_axis, label="MACD")  # Red for MACD line
-                    dpg.add_line_series(sec.historical_dates, signal_line, parent=y_axis, label="Signal")  # Blue for Signal line
+                    dpg.add_line_series(self.sec.historical_dates, macd_line, parent=y_axis, label="MACD")  # Red for MACD line
+                    dpg.add_line_series(self.sec.historical_dates, signal_line, parent=y_axis, label="Signal")  # Blue for Signal line
             
                 self.run_tests()
                 
