@@ -1,8 +1,6 @@
 import yfinance as yf
 import json
-from datetime import datetime, timedelta
-import random
-import time
+from datetime import datetime
 
 #downloads Ticker data and saves it to a json file with a set start range
 class DataManager:

@@ -79,7 +79,6 @@ class Display:
 
     def secObserver(self, Data):
         self.sec = Data
-        print("Data has been updated")
         self.update_graph()
         
     #download Specified Ticker data and load it
@@ -207,7 +206,7 @@ class Display:
                 macd_backtest = MACD.MACDBacktest(self.sec.historical_data, symbol = "MACD")
 
 
-                summary ,tdateB,tdateS,tHeightB,tHeightS = macd_backtest.run()
+                summary ,tdateB,tdateS,tHeightB,tHeightS,datesList = macd_backtest.run()
                 
                 # Display MACD results in GUI
                 dpg.add_text("MACD Backtest Results")
@@ -238,8 +237,8 @@ class Display:
                     #dpg.add_line_series(sec.historical_dates, sec.historical_closes, parent=y_axis, label="Price")
                     dpg.add_scatter_series(tdateB,tHeightB,parent=y_axis, label="Buy Signal")
                     dpg.add_scatter_series(tdateS,tHeightS,parent=y_axis, label="Sell Signal")
-                    dpg.add_line_series(self.sec.historical_dates, macd_line, parent=y_axis, label="MACD")  # Red for MACD line
-                    dpg.add_line_series(self.sec.historical_dates, signal_line, parent=y_axis, label="Signal")  # Blue for Signal line
+                    dpg.add_line_series(datesList, macd_line, parent=y_axis, label="MACD")  # Red for MACD line
+                    dpg.add_line_series(datesList, signal_line, parent=y_axis, label="Signal")  # Blue for Signal line
             
                 self.run_tests()
                 

@@ -1,5 +1,4 @@
 import Model.YFinanceAdaptor as dm
-from datetime import datetime, timedelta
 import random
 import time
 import threading
@@ -42,7 +41,6 @@ class security:
                 callback(data)
 
     def addRandomData(self):
-        data = self.historical_data
         last_date = self.historical_dates[-1]
         new_date = last_date + 86400 
         last_close = self.historical_closes[-1]
@@ -54,20 +52,14 @@ class security:
             time.sleep(10)
             return None
         new_open = last_close
-        data['Open'][new_date] = new_open
-        data['Close'][new_date] = new_close
         new_high = max(new_open, new_close) * (1 + random.uniform(0, 0.02))
         new_low = min(new_open, new_close) * (1 - random.uniform(0, 0.02))
-        data['High'][new_date] = new_high
-        data['Low'][new_date] = new_low
 
-        self.historical_data = data
         self.historical_opens.append(new_open)
         self.historical_closes.append(new_close)
         self.historical_highs.append(new_high)
         self.historical_lows.append(new_low)
         self.historical_dates.append(new_date)
-    
         self.publish(self)
 
     def startAddingRandomData(self, interval=.05):
