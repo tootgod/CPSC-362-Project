@@ -14,35 +14,38 @@ class Display:
         self.graphLabel = "Loaded Data"
 
         #check if json exists and load it if it does
-        if os.path.exists('historical_data.json'):
-            self.sec = Security.security()
-            self.sec.startAddingRandomData()
+    
+
             
     
     def startup(self):
         dpg.create_context()
 
         if os.path.exists('historical_data.json'):
+            self.sec = Security.security()
+            self.sec.subscribe(self.secObserver)
             self.show_graph()
 
         with dpg.window(tag="Primary Window",width = 1100):
             def on_button_fngu():
-
+                self.sec.unsubscribe(self.secObserver)
                 day = int(dpg.get_value(dayDropdown))
                 month = int(dpg.get_value(monthDropdown))
                 year = int(dpg.get_value(yearDropdown))
                 date = datetime(year,month,day)
                 self.setupTicker(date,"FNGU")
                 self.show_graph()
+                self.sec.subscribe(self.secObserver)
             
             def on_button_fngd():
-
+                self.sec.unsubscribe(self.secObserver)
                 day = int(dpg.get_value(dayDropdown))
                 month = int(dpg.get_value(monthDropdown))
                 year = int(dpg.get_value(yearDropdown))
                 date = datetime(year,month,day)
                 self.setupTicker(date,"FNGD")     
-                self.show_graph()       
+                self.show_graph()     
+                self.sec.subscribe(self.secObserver)  
 
             def on_button_backtest():
                 backtest = dpg.get_value(backtestDropdown)
@@ -58,7 +61,13 @@ class Display:
             yearDropdown = dpg.add_combo(label="Year", items=["2024","2023","2022","2021","2020","2019","2018"],default_value="2020",width=50)
             backtestDropdown = dpg.add_combo(label="Backtest", items=["SMA","BB","MACD"],default_value="SMA",width=50)
             backtestButton = dpg.add_button(label="Run Backtest",callback=on_button_backtest)
+            numbergenButton = dpg.add_button(label="Toggle Data Generation",callback=self.genToggle)
 
+
+        if os.path.exists('historical_data.json'):
+            sec = Security.security()
+            sec.subscribe(self.secObserver)
+            self.show_graph()
         dpg.create_viewport(title='Trading Data', width=1168, height=705)
         dpg.setup_dearpygui()
         dpg.show_viewport()
@@ -71,14 +80,12 @@ class Display:
     def secObserver(self, Data):
         self.sec = Data
         print("Data has been updated")
-        self.show_graph()
+        self.update_graph()
         
     #download Specified Ticker data and load it
     def setupTicker(self, date,ticker):
         self.graphLabel = ticker
         self.sec = Security.security(date,ticker)
-        self.sec.subscribe(self.secObserver)
-        self.sec.startAddingRandomData()
         if os.path.exists('historical_data.json'):
             self.sec = Security.security(ticker)
         else:
@@ -114,14 +121,25 @@ class Display:
                 y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Price")
                 dpg.set_axis_limits_auto(y_axis)
 
-                line_graph = dpg.add_line_series(self.sec.historical_dates, self.sec.historical_closes, parent=y_axis, label="Line Data")
-                candle_graph = dpg.add_candle_series(self.sec.historical_dates, self.sec.historical_opens, self.sec.historical_closes, self.sec.historical_lows, self.sec.historical_highs, parent=y_axis, show=True, tooltip=True, label="Candle Data")
+            line_graph = dpg.add_line_series(self.sec.historical_dates, self.sec.historical_closes, parent=y_axis, label="Line Data",tag="Line Graph")
+            candle_graph = dpg.add_candle_series(self.sec.historical_dates, self.sec.historical_opens, self.sec.historical_closes, self.sec.historical_lows, self.sec.historical_highs, parent=y_axis, show=True, tooltip=True, label="Candle Data",tag="Candle Graph")
             
-            
+    def genToggle(self):
+        if self.sec.genning:
+            self.sec.stopAddingRandomData()
+        else:
+            self.sec.startAddingRandomData()        
 
     def close_graph(self):
         if dpg.does_item_exist("Historical Data"):
             dpg.delete_item("Historical Data")
+
+
+    def update_graph(self):
+        if dpg.does_item_exist("Line Graph"):
+            dpg.configure_item("Line Graph", y=self.sec.historical_closes, x=self.sec.historical_dates)
+        if dpg.does_item_exist("Candle Graph"):
+            dpg.configure_item("Candle Graph", opens=self.sec.historical_opens, closes=self.sec.historical_closes, lows=self.sec.historical_lows, highs=self.sec.historical_highs, dates=self.sec.historical_dates)
 
     def run_tests(self):
         # Discover and run tests from both test files
@@ -140,6 +158,7 @@ class Display:
 
         # Print the test results
         #print(f"Tests run: {results.testsRun}, Failures: {len(results.failures)}, Errors: {len(results.errors)}")
+
 
 
     def backtestWindow(self, strat):
