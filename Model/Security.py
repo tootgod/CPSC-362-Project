@@ -14,6 +14,7 @@ class security:
             self.historical_highs = dm.DataManager.getJsonHighs(self.historical_data)
             self.historical_lows = dm.DataManager.getJsonLows(self.historical_data)
             self.historical_opens = dm.DataManager.getJsonOpens(self.historical_data)
+            self.genning = False
             dm.DataManager.humanJson()
         else:
             dm.DataManager.downloadTicker(Date,Ticker)
@@ -23,12 +24,17 @@ class security:
             self.historical_highs = dm.DataManager.getJsonHighs(self.historical_data)
             self.historical_lows = dm.DataManager.getJsonLows(self.historical_data)
             self.historical_opens = dm.DataManager.getJsonOpens(self.historical_data)
+            self.genning = False
             dm.DataManager.humanJson()
        
     def subscribe(self, callback):
         if not hasattr(self, 'subscribers'):
             self.subscribers = []
         self.subscribers.append(callback)
+
+    def unsubscribe(self, callback):
+        if hasattr(self, 'subscribers'):
+            self.subscribers.remove(callback)
     
     def publish(self, data):
         if hasattr(self, 'subscribers'):
@@ -38,7 +44,7 @@ class security:
     def addRandomData(self):
         data = self.historical_data
         last_date = self.historical_dates[-1]
-        new_date = last_date + 86400000
+        new_date = last_date + 86400 
         last_close = self.historical_closes[-1]
         if last_close is not None:
             change_percent = random.uniform(-0.03, 0.03)
@@ -64,14 +70,16 @@ class security:
     
         self.publish(self)
 
-    def startAddingRandomData(self, interval=1):
+    def startAddingRandomData(self, interval=.2):
+        self.genning = True
         def run():
-            while True:
+            while self.genning:
                 self.addRandomData()
                 time.sleep(interval)
         
         thread = threading.Thread(target=run)
         thread.daemon = True
         thread.start()
-
-        
+    
+    def stopAddingRandomData(self):
+        self.genning = False
