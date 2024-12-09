@@ -204,8 +204,9 @@ class Display:
                     dpg.add_line_series(self.sec.historical_dates,lband,parent=y_axis, label="Lower Band")
             elif strat == "MACD":
                 # Run MACD Backtest
-                print(self.sec)
                 macd_backtest = MACD.MACDBacktest(self.sec.historical_data, symbol = "MACD")
+
+
                 summary ,tdateB,tdateS,tHeightB,tHeightS = macd_backtest.run()
                 
                 # Display MACD results in GUI
