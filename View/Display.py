@@ -10,12 +10,20 @@ import Model.Security as Security
 import unittest
 sec = None
 graphLabel = "Loaded Data"
+
+def secObserver(Data):
+    global sec
+    sec = Data
+    print("Data has been updated")
+    show_graph()
     
 #download Specified Ticker data and load it
 def setupTicker(date,ticker):
     global graphLabel,sec
     graphLabel = ticker
     sec = Security.security(date,ticker)
+    sec.subscribe(secObserver)
+    sec.startAddingRandomData()
     if os.path.exists('historical_data.json'):
         sec = Security.security(ticker)
     else:
@@ -25,6 +33,8 @@ def setupTicker(date,ticker):
 #check if json exists and load it if it does
 if os.path.exists('historical_data.json'):
     sec = Security.security()
+    sec.startAddingRandomData()
+
 
    
 
