@@ -14,7 +14,7 @@ graphLabel = "Loaded Data"
 def secObserver(Data):
     global sec
     sec = Data
-    print("Data has been updated")
+    #print("Data has been updated")
     update_graph()
     
 #download Specified Ticker data and load it
