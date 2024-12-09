@@ -3,9 +3,8 @@ from datetime import datetime
 import csv
 
 class MACDBacktest:
-    def __init__(self, sec, symbol, initial_balance=100000):
-        historical_data = sec.historical_data
-        self.datesList = sec.historical_dates
+    def __init__(self, historical_data, symbol, initial_balance=100000):
+        self.datesList = [int(date) / 1000 for date in historical_data['Close'].keys()]
         #ensure historical_data is a DataFrame
         if isinstance(historical_data, dict):
             historical_data = pd.DataFrame(historical_data)
