@@ -92,27 +92,40 @@ class MACDStrategy(TradingStrategy):
     
     def getBacktestResults(self, sec):
         macd_backtest = MACD.MACDBacktest(sec.historical_data, symbol="MACD")
-        return macd_backtest.run()
+        summary, tdateB, tdateS, tHeightB, tHeightS = macd_backtest.run()
+        macd_line, signal_line = macd_backtest.calculate_macd()
+        return summary, tdateB, tdateS, tHeightB, tHeightS, macd_line, signal_line
     
     def plot(self, dpg, sec, results):
-        summary, tdateB, tdateS, tHeightB, tHeightS = results
+        summary, tdateB, tdateS, tHeightB, tHeightS, macd_line, signal_line = results
 
+        # Ensure lines are converted to lists
+        macd_line = macd_line.to_list() if hasattr(macd_line, 'to_list') else macd_line
+        signal_line = signal_line.to_list() if hasattr(signal_line, 'to_list') else signal_line
+
+        # Ensure the lengths of MACD and signal lines match the dates
+        min_length = min(len(sec.historical_dates), len(macd_line), len(signal_line))
+        dates = sec.historical_dates[:min_length]
+        macd_line = macd_line[:min_length]
+        signal_line = signal_line[:min_length]
+
+        # Display the results summary
         dpg.add_text(f"{self.getName()} Backtest Results")
         dpg.add_text(f"Final Balance: ${summary['final_balance']:,.2f}")
         dpg.add_text(f"Total % Return: {summary['percent_return']:.2f}%")
-        
+
+        # Plot the results
         with dpg.plot(label="Closing Prices", height=600, width=900):
             dpg.add_plot_legend()
             dpg.add_plot_axis(dpg.mvXAxis, label="Trade number", time=True)
             y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
             dpg.set_axis_limits_auto(y_axis)
+
             dpg.add_scatter_series(tdateB, tHeightB, parent=y_axis, label="Buy Signal")
             dpg.add_scatter_series(tdateS, tHeightS, parent=y_axis, label="Sell Signal")
-            
-            macd_backtest = MACD.MACDBacktest(sec.historical_data)
-            macd_line, signal_line = macd_backtest.calculate_macd()
-            dpg.add_line_series(sec.historical_dates, macd_line.to_list(), parent=y_axis, label="MACD")
-            dpg.add_line_series(sec.historical_dates, signal_line.to_list(), parent=y_axis, label="Signal")
+            dpg.add_line_series(dates, macd_line, parent=y_axis, label="MACD")  # Red for MACD line
+            dpg.add_line_series(dates, signal_line, parent=y_axis, label="Signal")  # Blue for Signal line
+
 
 
 
@@ -251,8 +264,6 @@ class Display:
         runner = unittest.TextTestRunner()
         results = runner.run(suite)
 
-        # Print the test results
-        #print(f"Tests run: {results.testsRun}, Failures: {len(results.failures)}, Errors: {len(results.errors)}")
 
     def backtestWindow(self, strategy: TradingStrategy):
         results = strategy.getBacktestResults(self.sec)
