@@ -1,1 +1,3 @@
-import View.Display as Display
+from View.Display import Display
+
+display = Display()
