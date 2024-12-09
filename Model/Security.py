@@ -70,7 +70,7 @@ class security:
     
         self.publish(self)
 
-    def startAddingRandomData(self, interval=.2):
+    def startAddingRandomData(self, interval=.05):
         self.genning = True
         def run():
             while self.genning:
