@@ -1,9 +1,47 @@
 import yfinance as yf
 import json
 from datetime import datetime
+import abc
+
+class DataManager:
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def downloadTicker(start_date, ticker):
+        pass
+
+    @abc.abstractmethod
+    def loadData():
+        pass
+
+    @abc.abstractmethod
+    def getJsonDates(data):
+        pass
+
+    @abc.abstractmethod
+    def getJsonCloses(data):
+        pass
+
+    @abc.abstractmethod
+    def getJsonHighs(data):
+        pass
+
+    @abc.abstractmethod
+    def getJsonLows(data):
+        pass
+
+    @abc.abstractmethod
+    def getJsonOpens(data):
+        pass
+
+    @abc.abstractmethod
+    def humanJson():
+        pass
+
+    
 
 #downloads Ticker data and saves it to a json file with a set start range
-class DataManager:
+class DataManagerYahooAdapter(DataManager):
     @staticmethod
     def downloadTicker(start_date,ticker):
         today = datetime.now()
@@ -36,7 +74,17 @@ class DataManager:
     @staticmethod
     def getJsonOpens(data):
         return list(data['Open'].values())
+
+
+
+class DataManagerDecorator(DataManagerYahooAdapter):
+    data_manager = DataManagerYahooAdapter.__init__
     
+    @staticmethod
+    def downloadTicker(start_date, end_date, ticker):
+        fngu_data = yf.download(ticker, start=start_date, end=end_date)
+        fngu_data.to_json('historical_data.json')
+
     @staticmethod
     def humanJson():
         tickers = ["FNGU", "FNGD"]
@@ -60,39 +108,5 @@ class DataManager:
     
         with open("readableHistoricalData.json", "w") as f:
             json.dump(output_data, f, indent=4)
-
-
-class DataManagerDecorator:
-    def __init__(self):
-        self.data_manager = DataManager()
-
-    def downloadTicker(self, start_date, ticker):
-        self.data_manager.downloadTicker(start_date, ticker)
-
-    def loadData(self):
-        return self.data_manager.loadData()
-
-    def getJsonDates(self, data):
-        return self.data_manager.getJsonDates(data)
-
-    def getJsonCloses(self, data):
-        return self.data_manager.getJsonCloses(data)
-
-    def getJsonHighs(self, data):
-        return self.data_manager.getJsonHighs(data)
-
-    def getJsonLows(self, data):
-        return self.data_manager.getJsonLows(data)
-
-    def getJsonOpens(self, data):
-        return self.data_manager.getJsonOpens(data)
-
-    def humanJson(self):
-        self.data_manager.humanJson()
-    
-    def downloadTicker(self, start_date, end_date, ticker):
-        fngu_data = yf.download(ticker, start=start_date, end=end_date)
-        fngu_data.to_json('historical_data.json')
-
     
    
