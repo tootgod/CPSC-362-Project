@@ -7,24 +7,24 @@ class security:
     
     def __init__(self, Date = 0,Ticker = "0"):
         if Ticker == "0":
-            self.historical_data = dm.DataManager.loadData()
-            self.historical_dates = dm.DataManager.getJsonDates(self.historical_data) #Historical dates is a list of unix timestamps. It is saved this way because it is easier to convert unix timestamps to datetime objects in pandas, but hard to do the reverse.
-            self.historical_closes = dm.DataManager.getJsonCloses(self.historical_data)
-            self.historical_highs = dm.DataManager.getJsonHighs(self.historical_data)
-            self.historical_lows = dm.DataManager.getJsonLows(self.historical_data)
-            self.historical_opens = dm.DataManager.getJsonOpens(self.historical_data)
+            self.historical_data = dm.DataManagerDecorator.loadData()
+            self.historical_dates = dm.DataManagerDecorator.getJsonDates(self.historical_data) #Historical dates is a list of unix timestamps. It is saved this way because it is easier to convert unix timestamps to datetime objects in pandas, but hard to do the reverse.
+            self.historical_closes = dm.DataManagerDecorator.getJsonCloses(self.historical_data)
+            self.historical_highs = dm.DataManagerDecorator.getJsonHighs(self.historical_data)
+            self.historical_lows = dm.DataManagerDecorator.getJsonLows(self.historical_data)
+            self.historical_opens = dm.DataManagerDecorator.getJsonOpens(self.historical_data)
             self.genning = False
-            dm.DataManager.humanJson()
+            dm.DataManagerDecorator.humanJson()
         else:
-            dm.DataManager.downloadTicker(Date,Ticker)
-            self.historical_data = dm.DataManager.loadData()
-            self.historical_dates = dm.DataManager.getJsonDates(self.historical_data)
-            self.historical_closes = dm.DataManager.getJsonCloses(self.historical_data)
-            self.historical_highs = dm.DataManager.getJsonHighs(self.historical_data)
-            self.historical_lows = dm.DataManager.getJsonLows(self.historical_data)
-            self.historical_opens = dm.DataManager.getJsonOpens(self.historical_data)
+            dm.DataManagerDecorator.downloadTicker(Date,Ticker)
+            self.historical_data = dm.DataManagerDecorator.loadData()
+            self.historical_dates = dm.DataManagerDecorator.getJsonDates(self.historical_data)
+            self.historical_closes = dm.DataManagerDecorator.getJsonCloses(self.historical_data)
+            self.historical_highs = dm.DataManagerDecorator.getJsonHighs(self.historical_data)
+            self.historical_lows = dm.DataManagerDecorator.getJsonLows(self.historical_data)
+            self.historical_opens = dm.DataManagerDecorator.getJsonOpens(self.historical_data)
             self.genning = False
-            dm.DataManager.humanJson()
+            dm.DataManagerDecorator.humanJson()
        
     def subscribe(self, callback):
         if not hasattr(self, 'subscribers'):
