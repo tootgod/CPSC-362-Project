@@ -15,6 +15,6 @@ This also includes backtesting and logging evey trade that is automatically perf
 * Helen Truong
 
 # Instructions 
- Run __main__.py to launch the application
- ex. python3 __main__.py
+ Run `__main__.py` to launch the application
+ ex. `python3 __main__.py`
 
