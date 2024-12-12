@@ -1,5 +1,5 @@
 import pandas as pd
-import Controller.SmaBacktest as sma
+import Model.SmaBacktest as sma
 
 def BB_backtest(sec, period=20, symbol='BB', initial_balance=100000, std_dMult=1):
     # Load dates and close prices from a Security object

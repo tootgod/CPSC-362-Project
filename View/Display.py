@@ -2,12 +2,12 @@ from datetime import datetime
 from abc import ABC, abstractmethod
 import os
 import dearpygui.dearpygui as dpg
-import Controller.SmaBacktest as sma
-import Controller.MACDBacktest as MACD
-import Controller.BBbacktest as BB
+import Model.SmaBacktest as sma
+import Model.MACDBacktest as MACD
+import Model.BBbacktest as BB
 import utest_MACD as utest_MACD
 import itest_MACD as itest_MACD
-import Model.Security as Security
+import Controller.Security as Security
 import unittest
 
 class TradingStrategy(ABC):
