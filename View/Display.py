@@ -121,8 +121,8 @@ class MACDStrategy(TradingStrategy):
             y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="Capital")
             dpg.set_axis_limits_auto(y_axis)
 
-            dpg.add_scatter_series(tdateB, tHeightB, parent=y_axis, label="Buy Signal")
-            dpg.add_scatter_series(tdateS, tHeightS, parent=y_axis, label="Sell Signal")
+            dpg.add_scatter_series(tdateB, tHeightB, parent=y_axis, label="Sell Signal") #we flipped them buy over signal, sell under signal
+            dpg.add_scatter_series(tdateS, tHeightS, parent=y_axis, label="Buy Signal")
             dpg.add_line_series(dates, macd_line, parent=y_axis, label="MACD")  # Red for MACD line
             dpg.add_line_series(dates, signal_line, parent=y_axis, label="Signal")  # Blue for Signal line
 
