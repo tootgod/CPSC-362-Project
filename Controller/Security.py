@@ -1,4 +1,4 @@
-import Model.YFinanceAdaptor as dm
+import Controller.YFinanceAdaptor as dm
 import random
 import time
 import threading

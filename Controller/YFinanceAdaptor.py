@@ -78,12 +78,30 @@ class DataManagerYahooAdapter(DataManager):
 
 
 class DataManagerDecorator(DataManagerYahooAdapter):
-    data_manager = DataManagerYahooAdapter.__init__
-    
+    data_manager = DataManagerYahooAdapter()
+
     @staticmethod
-    def downloadTicker(start_date, end_date, ticker):
-        fngu_data = yf.download(ticker, start=start_date, end=end_date)
-        fngu_data.to_json('historical_data.json')
+    def downloadTicker(start_date, ticker):
+        DataManagerDecorator.data_manager.downloadTicker(start_date, ticker)
+    @staticmethod
+    def loadData():
+        return DataManagerDecorator.data_manager.loadData()
+    @staticmethod
+    def getJsonDates(data):
+        return DataManagerDecorator.data_manager.getJsonDates(data)
+    @staticmethod
+    def getJsonCloses(data):
+        return DataManagerDecorator.data_manager.getJsonCloses(data)
+    @staticmethod
+    def getJsonHighs(data):
+        return DataManagerDecorator.data_manager.getJsonHighs(data)
+    @staticmethod
+    def getJsonLows(data):
+        return DataManagerDecorator.data_manager.getJsonLows(data)
+    @staticmethod
+    def getJsonOpens(data):
+        return DataManagerDecorator.data_manager.getJsonOpens(data)
+    
 
     @staticmethod
     def humanJson():

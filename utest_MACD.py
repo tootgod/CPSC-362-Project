@@ -1,6 +1,6 @@
 import unittest
 import pandas as pd
-from Controller.MACDBacktest import MACDBacktest
+from Model.MACDBacktest import MACDBacktest
 
 class TestMACDBacktest(unittest.TestCase):
     def setUp(self):
