@@ -1,4 +1,4 @@
-import Controller.YFinanceAdaptor as dm
+import YFinanceAdaptor as dm
 import random
 import time
 import threading
@@ -7,6 +7,7 @@ class security:
     
     def __init__(self, Date = 0,Ticker = "0"):
         if Ticker == "0":
+            data = dm.DataManagerDecorator()
             self.historical_data = dm.DataManagerDecorator.loadData()
             self.historical_dates = dm.DataManagerDecorator.getJsonDates(self.historical_data) #Historical dates is a list of unix timestamps. It is saved this way because it is easier to convert unix timestamps to datetime objects in pandas, but hard to do the reverse.
             self.historical_closes = dm.DataManagerDecorator.getJsonCloses(self.historical_data)
